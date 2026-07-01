@@ -30,8 +30,20 @@ local TPIKHelperBonePatchRuntimeDisabled = false
 local activeposvector = Vector(-1, -1, 1)
 local peekvector = Vector(0, 2, 4)
 local someangforsights = Angle(3, -3, -8)
-local nearwallpos = Vector(1, 0, 18)
-local nearwallang = Angle(-70, 0, 0)
+local nearwallpos = Vector(5, -16, 0.5)
+local nearwallang = Angle(10, -80, -10)
+
+local lowreadyvector = Vector(-0.0, -1, -5.0)
+local highreadyvector = Vector(-0, -0, 0)
+local somalianvector = Vector(-0.0, -0, -6.0)
+local cornervector = Vector(-6.0, -8, 6.0)
+local leftshouldervector = Vector(4, 10, -1)
+
+local lowreadyangle = Angle(30, -10, -5)
+local highreadyangle = Angle(0, 0, 0)
+local somalianangle = Angle(0, -0, -30)
+local cornerangle = Angle(0, -0, 20)
+local leftshoulderangle = Angle(0, -0, 0)
 
 local PlayerReanimsOffsets = {
     default = {
@@ -883,7 +895,12 @@ local function SetTPIKOffset(self, wm, owner, lp)
         if sightdelta > 0 then -- sight offset
             local sightdelta2 = math.ease.InOutCubic(sightdelta)
             pos:Add(self.WorldModelOffset.TPIKPosSightOffset * sightdelta2)
-            ang:Add(someangforsights * math.sin(3.1415926 * math.ease.InOutSine(sightdelta)))
+            local angofset = self.WorldModelOffset.TPIKAngSightOffset
+            if angofset then
+                ang:Add(angofset * sightdelta2)
+            else
+                ang:Add(someangforsights * math.sin(3.1415926 * math.ease.InOutSine(sightdelta)))
+            end
         end
 
         if self.WorldModelOffset.TPIKPosReloadOffset then
@@ -980,6 +997,36 @@ local function SetTPIKOffset(self, wm, owner, lp)
             self.TPIKSmoothRecoilAng = LerpVector(FrameTime() * 1, self.TPIKSmoothRecoilAng or vra, vra)
             pos:Sub(self.TPIKSmoothRecoilPos)
             ang:Add(Angle(-self.TPIKSmoothRecoilAng.x, self.TPIKSmoothRecoilAng.y, self.TPIKSmoothRecoilAng.z))
+        end
+    end
+
+    do
+        local reloading = self:GetReloading()
+        local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
+        local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+        local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+        local eft_weight = self:GetValue("EFTWeight")
+        --local eft_stances = swepGetProcessedValue(self, "EFTCombatStances", true)
+
+        if eft_weight > 6 and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
+            pos:Add(lowreadyvector)
+            ang:Add(lowreadyangle)
+        end
+
+
+        if eft_inleftshoulder == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
+            pos:Add(leftshouldervector)
+            ang:Add(leftshoulderangle)
+        end
+
+        if eft_incorner == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
+            pos:Add(cornervector)
+            ang:Add(cornerangle)
+        end
+
+        if eft_insomalian == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
+            pos:Add(somalianvector)
+            ang:Add(somalianangle)
         end
     end
 

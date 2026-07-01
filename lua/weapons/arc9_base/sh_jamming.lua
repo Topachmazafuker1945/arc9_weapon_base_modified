@@ -51,7 +51,7 @@ function SWEP:FixHeat()
     if self:StillWaiting() and !self.NoFireDuringSighting then return end
     if self.StartedFixingJam then return end
     -- self:ExitSights()
-
+    local owner = self:GetOwner()
     -- self:PlayAnimation("fix", self:GetProcessedValue("OverheatTime"), true)
     -- self:SetJammed(false)
 
@@ -60,18 +60,21 @@ function SWEP:FixHeat()
     -- end
 
     
-    self.StartedFixingJam = true
-    local t = self:PlayAnimation("fix", self:GetProcessedValue("OverheatTime", true), true)
-    self:SetInSights(false)
+    if owner:KeyDown(IN_RELOAD) or owner:KeyDown(ARC9.IN_INSPECT) then
 
-    self:SetTimer(t * 0.8, function()
-        self:SetJammed(false)
+        self.StartedFixingJam = true
+        local t = self:PlayAnimation("fix", self:GetProcessedValue("OverheatTime", true), true)
+        self:SetInSights(false)
 
-        if self:GetProcessedValue("HeatFix", true) then
-            self:SetHeatAmount(0)
-        end
-        self.StartedFixingJam = nil
-    end, "jamtimer")
+        self:SetTimer(t * 0.8, function()
+            self:SetJammed(false)
+
+            if self:GetProcessedValue("HeatFix", true) then
+                self:SetHeatAmount(0)
+            end
+            self.StartedFixingJam = nil
+        end, "jamtimer")
+    end
 end
 
 function SWEP:ThinkHeat(dt)

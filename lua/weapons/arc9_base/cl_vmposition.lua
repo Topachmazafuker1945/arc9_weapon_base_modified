@@ -26,6 +26,18 @@ local vmAddZ = GetConVar("arc9_vm_addz")
 local arc9DevBenchGun = GetConVar("arc9_dev_benchgun")
 local isSingleplayer = game.SinglePlayer()
 
+--[[local lowreadyvector = Vector(-2.0, -5, 1.0)
+local highreadyvector = Vector(-0, -0, 0)
+local somalianvector = Vector(-2.0, -5, 5.0)
+local cornervector = Vector(3.0, -5, -2.0)
+local leftshouldervector = Vector(-7.0, -5, 0)
+
+local lowreadyangle = Angle(0, -10, -5)
+local highreadyangle = Angle(0, 0, 0)
+local somalianangle = Angle(0, 0, -30)
+local cornerangle = Angle(0, -0, 5)
+local leftshoulderangle = Angle(0, -0, -5)]]--
+
 local Lerp = function(a, v1, v2)
     local d = v2 - v1
 
@@ -166,11 +178,14 @@ end
 
 local swepGetProcessedValue = SWEP.GetProcessedValue
 
+
 function SWEP:GetViewModelPosition(pos, ang)
     local owner = self:GetOwner()
     if !IsValid(owner) then return end
     -- if owner != LocalPlayer() then return end
     if CLIENT and owner ~= LocalPlayer() then return end
+    local fraction = owner:GetNW2Float("leaning_fraction", 0)
+    local abs_fraction = math.abs(fraction)
 
     if !swepGetProcessedValue then swepGetProcessedValue = self.GetProcessedValue end
 
@@ -212,12 +227,70 @@ function SWEP:GetViewModelPosition(pos, ang)
         extra_offsetang:Add(mv_jaffset) -- what does all this extra offset stuff do?
     end
 
+    
+
+    local reloading = self:GetReloading()
     -- if self.PV_Move > 0.2 and self:GetSprintDelta() == 0 then
     --     offsetpos:Set(swepGetProcessedValue(self, "MovingPos"))
     --     offsetang:Set(swepGetProcessedValue(self, "MovingAng"))
     -- end
+    
+    local eft_stances = swepGetProcessedValue(self, "EFTCombatStances", true)
+
+    local lowreadyvector = swepGetProcessedValue(self, "LowReadyVector", true)
+    local highreadyvector = swepGetProcessedValue(self, "HighReadyVector", true)
+    local leftshouldervector = swepGetProcessedValue(self, "LeftShoulderVector", true)
+    local cornervector = swepGetProcessedValue(self, "CornerVector", true)
+    local somalianvector = swepGetProcessedValue(self, "SomalianVector", true)
+
+    local lowreadyangle = swepGetProcessedValue(self, "LowReadyAngle", true)
+    local highreadyangle = swepGetProcessedValue(self, "HighReadyAngle", true)
+    local leftshoulderangle = swepGetProcessedValue(self, "LeftShoulderAngle", true)
+    local cornerangle = swepGetProcessedValue(self, "CornerAngle", true)
+    local somalianangle = swepGetProcessedValue(self, "SomalianAngle", true)
+
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+    local weight = self:GetValue("EFTWeight")
+
+    if !reloading and eft_stances then
+        if weight > 6 then
+            local sprpos = lowreadyvector
+            local sprang = lowreadyangle
+            LerpVectorEdit(1, offsetpos, sprpos)
+            LerpAngleEdit(1, offsetang, sprang)
+        end
+    end
+
+    if !reloading then 
+        if eft_incorner == true then
+            local sprpos = cornervector
+            local sprang = cornerangle
+            LerpVectorEdit(1, offsetpos, sprpos)
+            LerpAngleEdit(1, offsetang, sprang)
+        end
+    end
+
+    if !reloading then
+        if eft_inleftshoulder == true then
+            local sprpos = leftshouldervector
+            local sprang = leftshoulderangle
+            LerpVectorEdit(1, offsetpos, sprpos)
+            LerpAngleEdit(1, offsetang, sprang)
+        end
+    end
+
+    if !reloading then
+        if eft_insomalian == true then
+            local sprpos = somalianvector
+            local sprang = somalianangle
+            LerpVectorEdit(1, offsetpos, sprpos)
+            LerpAngleEdit(1, offsetang, sprang)
+        end
+    end
+
     local getbipod = self:GetBipod()
-    local reloading = self:GetReloading()
 
     if getbipod then
         local bipodamount = self:GetBipodAmount()
@@ -303,6 +376,7 @@ function SWEP:GetViewModelPosition(pos, ang)
     -- cor_val = Lerp(sightdelta, cor_val, 1)
     self.SwayScale = 0
 
+
     if sightdelta > 0 then
         local insifgts = self:GetInSights()
         if insifgts then
@@ -373,10 +447,10 @@ function SWEP:GetViewModelPosition(pos, ang)
             inertiaanchor = self.InertiaCustomAnchor 
         else
             inertiaanchor = Vector(self.CustomizeRotateAnchor)
-            -- inertiaanchor.x = inertiaanchor.x * ((self.RenderingHolosight or self.RenderingRTScope) and 0.75 or 0.4)
+            inertiaanchor.x = inertiaanchor.x * ((self.RenderingHolosight or self.RenderingRTScope) and 0.75 or 0.4)
         end
 
-        local rap_pos, rap_ang = self:RotateAroundPoint2(pos, ang, inertiaanchor, vector_origin, fswayang * -1.0)
+        local rap_pos, rap_ang = self:RotateAroundPoint2(pos, ang, inertiaanchor, vector_origin, fswayang * -0.5)
         pos:Set(rap_pos)
         ang:Set(rap_ang)
     else

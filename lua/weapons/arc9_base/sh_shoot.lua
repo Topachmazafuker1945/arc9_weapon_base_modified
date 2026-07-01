@@ -2,6 +2,7 @@ local cancelmults = ARC9.CancelMultipliers[engine.ActiveGamemode()] or ARC9.Canc
 
 local swepGetProcessedValue = SWEP.GetProcessedValue
 local swepGetValue = SWEP.GetValue
+--local infbreathconvar = GetConVar("arc9_breath_infinite")
 
 local sp = game.SinglePlayer()
 
@@ -474,6 +475,7 @@ function SWEP:DoPrimaryAttack()
     self:DoEffects()
 
 
+    --if self:HoldingBreath() and !infbreathconvar:GetBool() then
     if self:HoldingBreath() then
         local d = 100 / math.max(1, swepGetProcessedValue(self, "HoldBreathTime", true))
         local breathtake = math.Clamp(delay * d * 3, 1, 10)
@@ -1056,7 +1058,92 @@ function SWEP:GetShootPos()
 
     pos, ang = self:GetRecoilOffset(pos, ang)
 
+    local shootposoffset = swepGetProcessedValue(self, "ShootPosOffset", true)
+    local shootposoffset_aim = swepGetProcessedValue(self, "ShootPosOffsetAim", true)
+    local shootposoffset_leftshoulder = swepGetProcessedValue(self, "ShootPosOffsetLeftShoulder", true)
+    local shootposoffset_corner = swepGetProcessedValue(self, "ShootPosOffsetCorner", true)
+    local shootposoffset_somalian = swepGetProcessedValue(self, "ShootPosOffsetSomalian", true)
+    --local leftshouldervector = Vector(-4.0, 0, -4)
+    --local sightoffset = Vector(-4, 0, 0)
+    --local corneroffset = Vector(2, 0, 1)
+    --local somalianoffset = Vector(0, 0, -2.25)
+
+    local angRight = ang:Right()
+    local angForward = ang:Forward()
+    local angUp = ang:Up()
+
+    --angRight:Mul(shootposoffset[1])
+    --angForward:Mul(shootposoffset[2])
+    --angUp:Mul(shootposoffset[3])
+
+    --pos:Add(angRight)
+    --pos:Add(angForward)
+    --pos:Add(angUp)
+
+    pos, ang = self:GetRecoilOffset(pos, ang)
+
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) or {}
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) or {}
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) or {}
+    local sight = self:GetSightDelta()
+
+    if sight > 0  then
+        angRight:Mul(shootposoffset_aim[1])
+        angForward:Mul(shootposoffset_aim[2])
+        angUp:Mul(shootposoffset_aim[3])
+
+        pos:Add(angRight)
+        pos:Add(angForward)
+        pos:Add(angUp)
+
+        return pos, ang
+    end
+
+    if eft_inleftshoulder == true then
+        angRight:Mul(shootposoffset_leftshoulder[1])
+        angForward:Mul(shootposoffset_leftshoulder[2])
+        angUp:Mul(shootposoffset_leftshoulder[3])
+
+        pos:Add(angRight)
+        pos:Add(angForward)
+        pos:Add(angUp)
+
+        return pos, ang
+    else
+        angRight:Mul(shootposoffset[1])
+        angForward:Mul(shootposoffset[2])
+        angUp:Mul(shootposoffset[3])
+
+        pos:Add(angRight)
+        pos:Add(angForward)
+        pos:Add(angUp)
+    end
+
+    if eft_incorner == true then
+        angRight:Mul(shootposoffset_corner[1])
+        angForward:Mul(shootposoffset_corner[2])
+        angUp:Mul(shootposoffset_corner[3])
+
+        pos:Add(angRight)
+        pos:Add(angForward)
+        pos:Add(angUp)
+
+        return pos, ang
+    end
+
+    if eft_insomalian == true then
+        angRight:Mul(shootposoffset_somalian[1])
+        angForward:Mul(shootposoffset_somalian[2])
+        angUp:Mul(shootposoffset_somalian[3])
+
+        pos:Add(angRight)
+        pos:Add(angForward)
+        pos:Add(angUp)
+
+        return pos, ang
+    end
     return pos, ang
+    
 end
 
 function SWEP:GetShootPositionVFIRE()

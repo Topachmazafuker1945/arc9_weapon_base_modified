@@ -110,12 +110,12 @@ function SWEP:HoldingBreath()
             self.IsHoldingBreath = !self.IsHoldingBreath
         end
     else
-        self.IsHoldingBreath = ownerkeydownspeed
+        self.IsHoldingBreath = self:GetSightAmount() > 0.5
     end
 
     lastpressed = ownerkeydownspeed
 
-    return self:CanHoldBreath() and self.IsHoldingBreath and (self:GetSightAmount() >= 1) and self:GetValue("HoldBreathTime") > 0
+    return self:CanHoldBreath() and self.IsHoldingBreath and (self:GetSightAmount() > 0.5) and self:GetValue("HoldBreathTime") > 0
 end
 
 local pp_amount = 0
@@ -134,11 +134,11 @@ function SWEP:HoldBreathPP()
 
     pp_amount = math.Approach(pp_amount, target, FrameTime() / 0.25)
 
-    DrawSharpen((0.5 * pp_amount) + (1.2 * amt_d), 2 * pp_amount)
+    --DrawSharpen((0.5 * pp_amount) + (1.2 * amt_d), 2 * pp_amount)
 
     local tint = Color(253, 255, 255)
 
-    local tab = {
+    --[[local tab = {
         [ "$pp_colour_addr" ] = (-1 + (tint.r / 255)) * pp_amount,
         [ "$pp_colour_addg" ] = (-1 + (tint.g / 255)) * pp_amount,
         [ "$pp_colour_addb" ] = (-1 + (tint.b / 255)) * pp_amount,
@@ -149,7 +149,7 @@ function SWEP:HoldBreathPP()
         [ "$pp_colour_mulg" ] = 0,
         [ "$pp_colour_mulb" ] = 0
     }
-    DrawColorModify(tab)
+    DrawColorModify(tab)]]--
 end
 
 function SWEP:HoldBreathHUD()
@@ -198,12 +198,17 @@ function SWEP:GetFreeSwayAmount()
     if !swayconvar:GetBool() then return 0 end
     if !self:GetOwner():IsPlayer() then return 0 end
     local sway = self:GetProcessedValue("Sway")
+    local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 
     sway = math.Max(sway, 0)
     if sway == 0 then return 0 end
 
-    if self:HoldingBreath() then return sway * 0.15 end
-
+    if self:HoldingBreath() then
+        if ownerkeydownspeed then 
+            return sway * 0.25 
+        end
+    end
+    
     if self:GetOutOfBreath() then
         sway = sway + ((1 - self:GetBreath() / 100) * 0.75)
     end

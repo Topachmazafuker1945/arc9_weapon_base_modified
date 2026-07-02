@@ -140,20 +140,6 @@ local LerpAngleEdit = function(a, v1, v2)
     v1[3] = v13 + (a * d3)
 end
 
-local LerpAngleEditSlow = function(a, v1, v2)
-    local v11 = v1[1]
-    local v12 = v1[2]
-    local v13 = v1[3]
-    local v21 = v2[1]
-    local v22 = v2[2]
-    local v23 = v2[3]
-    local d1 = math.AngleDifference(v21, v11)
-    local d2 = math.AngleDifference(v22, v12)
-    local d3 = math.AngleDifference(v23, v13)
-    v1[1] = v11 + (a * d1)
-    v1[2] = v12 + (a * d2)
-    v1[3] = v13 + (a * d3)
-end
 
 -- local ApproachVector = function(a1, a2, d)
 --     a1[1] = math.Approach(a1[1], a2[1], d)
@@ -185,11 +171,6 @@ end
 local DampAngleEdit = function(a, v1, v2)
     a = math.pow(a, RealFrameTime())
     LerpAngleEdit(a, v1, v2)
-end
-
-local DampAngleEditSlow = function(a, v1, v2)
-    a = math.pow(a, RealFrameTime() * 0.15)
-    LerpAngleEditSlow(a, v1, v2)
 end
 
 local function GoodAngleLerp(from, to, t)

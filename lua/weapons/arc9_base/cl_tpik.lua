@@ -951,7 +951,10 @@ local function SetTPIKOffset(self, wm, owner, lp)
 
     do -- nearwalling
         local nearwalldelta = self:GetNearWallAmount()
+        --local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+        --local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
 
+        --if nearwalldelta > 0 and ht != "passive" and ht != "normal" and eft_incorner == false and eft_insomalian == false then
         if nearwalldelta > 0 and ht != "passive" and ht != "normal" then
             nearwalldelta = math.ease.InOutQuad(nearwalldelta) - self.CustomizeDelta
             pos:Add(nearwallpos * nearwalldelta)
@@ -1000,14 +1003,27 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
     end
 
+    --[[local TPIKvector_lowready = self:GetValue (self, "TPIKLowReadyVector", true)
+    local TPIKvector_highready = self:GetValue(self, "TPIKHighReadyVector", true)
+    local TPIKvector_leftshoulder = self:GetValue(self, "TPIKLeftShoulderVector", true)
+    local TPIKvector_corner = self:GetValue(self, "TPIKCornerVector", true)
+    local TPIKvector_somalian = self:GetValue(self, "TPIKSomalianVector", true)
+
+    local TPIKangle_lowready = self:GetValue(self, "TPIKLowReadyAngle", true)
+    local TPIKangle_highready = self:GetValue(self, "TPIKHighReadyAngle", true)
+    local TPIKangle_leftshoulder = self:GetValue(self, "TPIKLeftShoulderAngle", true)
+    local TPIKangle_corner = self:GetValue(self, "TPIKCornerAngle", true)
+    local TPIKangle_somalian = self:GetValue(self, "TPIKSomalianAngle", true)]]
+
     do
         local reloading = self:GetReloading()
+        local nearwalldelta = self:GetNearWallAmount()
         local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
         local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
         local eft_weight = self:GetValue("EFTWeight") or 0
         local num_left = eft_inleftshoulder and 1 or 0
-        local can_use_stance = (ht != "passive" and ht != "normal" and sightdelta == 0)
+        local can_use_stance = (ht != "passive" and ht != "normal" and sightdelta == 0 and nearwalldelta == 0)
 
         local target_low = (eft_weight > 6 and can_use_stance) and 1 or 0
         self.lerp_low = Lerp(FrameTime() * 2.5, self.lerp_low or 0, target_low)

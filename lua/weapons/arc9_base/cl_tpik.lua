@@ -1018,7 +1018,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
         
         local target_left = (eft_inleftshoulder and can_use_stance) and 1 or 0
-        self.lerp_left = Lerp(FrameTime() * 5, self.lerp_left or 0, target_left)
+        self.lerp_left = Lerp(FrameTime() * 2.5, self.lerp_left or 0, target_left)
     
         if self.lerp_left > 0.001 then
             pos:Add(leftshouldervector * self.lerp_left)
@@ -1026,7 +1026,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
 
         local target_corner = (eft_incorner and can_use_stance) and 1 or 0
-        self.lerp_corner = Lerp(FrameTime() * 5, self.lerp_corner or 0, target_corner)
+        self.lerp_corner = Lerp(FrameTime() * 2.5, self.lerp_corner or 0, target_corner)
     
         if self.lerp_corner > 0.001 then
             pos:Add(cornervector * self.lerp_corner)
@@ -1034,7 +1034,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
 
         local target_somalian = (eft_insomalian and can_use_stance) and 1 or 0
-        self.lerp_somalian = Lerp(FrameTime() * 5, self.lerp_somalian or 0, target_somalian)
+        self.lerp_somalian = Lerp(FrameTime() * 2.5, self.lerp_somalian or 0, target_somalian)
     
         if self.lerp_somalian > 0.001 then
             pos:Add(somalianvector * self.lerp_somalian)

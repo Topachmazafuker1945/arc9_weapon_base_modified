@@ -1006,29 +1006,39 @@ local function SetTPIKOffset(self, wm, owner, lp)
         local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
         local eft_weight = self:GetValue("EFTWeight") or 0
+        local num_left = eft_inleftshoulder and 1 or 0
+        local can_use_stance = (ht != "passive" and ht != "normal" and !reloading and sightdelta == 0)
 
-        if eft_weight > 6 and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
-            pos:Add(lowreadyvector)
-            ang:Add(lowreadyangle)
+        local target_low = (eft_weight > 6 and can_use_stance) and 1 or 0
+        self.lerp_low = Lerp(FrameTime() * 2.5, self.lerp_low or 0, target_low)
+    
+        if self.lerp_low > 0.001 then
+            pos:Add(lowreadyvector * self.lerp_low)
+            ang:Add(lowreadyangle * self.lerp_low)
         end
         
-        if eft_inleftshoulder == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
-            --num_left = eft_inleftshoulder and 1 or 0
-            --self.num_left = Lerp(FrameTime() * 2, self.num_left or 0, num_left and 1 or 0)
-            --pos:Add(leftshouldervector * self.num_left)
-            --ang:Add(leftshoulderangle * self.num_left)
-            pos:Add(leftshouldervector)
-            ang:Add(leftshoulderangle)
+        local target_left = (eft_inleftshoulder and can_use_stance) and 1 or 0
+        self.lerp_left = Lerp(FrameTime() * 5, self.lerp_left or 0, target_left)
+    
+        if self.lerp_left > 0.001 then
+            pos:Add(leftshouldervector * self.lerp_left)
+            ang:Add(leftshoulderangle * self.lerp_left)
         end
 
-        if eft_incorner == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
-            pos:Add(cornervector)
-            ang:Add(cornerangle)
+        local target_corner = (eft_incorner and can_use_stance) and 1 or 0
+        self.lerp_corner = Lerp(FrameTime() * 5, self.lerp_corner or 0, target_corner)
+    
+        if self.lerp_corner > 0.001 then
+            pos:Add(cornervector * self.lerp_corner)
+            ang:Add(cornerangle * self.lerp_corner)
         end
 
-        if eft_insomalian == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
-            pos:Add(somalianvector)
-            ang:Add(somalianangle)
+        local target_somalian = (eft_insomalian and can_use_stance) and 1 or 0
+        self.lerp_somalian = Lerp(FrameTime() * 5, self.lerp_somalian or 0, target_somalian)
+    
+        if self.lerp_somalian > 0.001 then
+            pos:Add(somalianvector * self.lerp_somalian)
+            ang:Add(somalianangle * self.lerp_somalian)
         end
     end
 

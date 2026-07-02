@@ -1005,16 +1005,18 @@ local function SetTPIKOffset(self, wm, owner, lp)
         local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
         local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
-        local eft_weight = self:GetValue("EFTWeight")
-        --local eft_stances = swepGetProcessedValue(self, "EFTCombatStances", true)
+        local eft_weight = self:GetValue("EFTWeight") or 0
 
         if eft_weight > 6 and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
             pos:Add(lowreadyvector)
             ang:Add(lowreadyangle)
         end
-
-
+        
         if eft_inleftshoulder == true and ht != "passive" and ht != "normal" and !reloading and sightdelta == 0 then
+            --num_left = eft_inleftshoulder and 1 or 0
+            --self.num_left = Lerp(FrameTime() * 2, self.num_left or 0, num_left and 1 or 0)
+            --pos:Add(leftshouldervector * self.num_left)
+            --ang:Add(leftshoulderangle * self.num_left)
             pos:Add(leftshouldervector)
             ang:Add(leftshoulderangle)
         end

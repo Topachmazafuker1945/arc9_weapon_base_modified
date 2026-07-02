@@ -1007,7 +1007,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
         local eft_weight = self:GetValue("EFTWeight") or 0
         local num_left = eft_inleftshoulder and 1 or 0
-        local can_use_stance = (ht != "passive" and ht != "normal" and !reloading and sightdelta == 0)
+        local can_use_stance = (ht != "passive" and ht != "normal" and sightdelta == 0)
 
         local target_low = (eft_weight > 6 and can_use_stance) and 1 or 0
         self.lerp_low = Lerp(FrameTime() * 2.5, self.lerp_low or 0, target_low)
@@ -1017,7 +1017,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
             ang:Add(lowreadyangle * self.lerp_low)
         end
         
-        local target_left = (eft_inleftshoulder and can_use_stance) and 1 or 0
+        local target_left = (eft_inleftshoulder and can_use_stance and !reloading) and 1 or 0
         self.lerp_left = Lerp(FrameTime() * 2.5, self.lerp_left or 0, target_left)
     
         if self.lerp_left > 0.001 then
@@ -1025,7 +1025,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
             ang:Add(leftshoulderangle * self.lerp_left)
         end
 
-        local target_corner = (eft_incorner and can_use_stance) and 1 or 0
+        local target_corner = (eft_incorner and can_use_stance and !reloading) and 1 or 0
         self.lerp_corner = Lerp(FrameTime() * 2.5, self.lerp_corner or 0, target_corner)
     
         if self.lerp_corner > 0.001 then
@@ -1033,7 +1033,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
             ang:Add(cornerangle * self.lerp_corner)
         end
 
-        local target_somalian = (eft_insomalian and can_use_stance) and 1 or 0
+        local target_somalian = (eft_insomalian and can_use_stance and !reloading) and 1 or 0
         self.lerp_somalian = Lerp(FrameTime() * 2.5, self.lerp_somalian or 0, target_somalian)
     
         if self.lerp_somalian > 0.001 then

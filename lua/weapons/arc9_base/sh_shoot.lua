@@ -1086,8 +1086,9 @@ function SWEP:GetShootPos()
     local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) or {}
     local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) or {}
     local sight = self:GetSightDelta()
+    local bipodamount = self:GetBipodAmount()
 
-    if sight > 0  then
+    if sight > 0 or bipodamount == 1 then
         angRight:Mul(shootposoffset_aim[1])
         angForward:Mul(shootposoffset_aim[2])
         angUp:Mul(shootposoffset_aim[3])

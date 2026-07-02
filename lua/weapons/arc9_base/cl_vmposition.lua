@@ -230,16 +230,12 @@ function SWEP:GetViewModelPosition(pos, ang)
         extra_offsetang:Add(mv_jaffset) -- what does all this extra offset stuff do?
     end
 
-    
-
     local reloading = self:GetReloading()
     -- if self.PV_Move > 0.2 and self:GetSprintDelta() == 0 then
     --     offsetpos:Set(swepGetProcessedValue(self, "MovingPos"))
     --     offsetang:Set(swepGetProcessedValue(self, "MovingAng"))
     -- end
     
-    local eft_stances = swepGetProcessedValue(self, "EFTCombatStances", true)
-
     local lowreadyvector = swepGetProcessedValue(self, "LowReadyVector", true)
     local highreadyvector = swepGetProcessedValue(self, "HighReadyVector", true)
     local leftshouldervector = swepGetProcessedValue(self, "LeftShoulderVector", true)
@@ -255,42 +251,54 @@ function SWEP:GetViewModelPosition(pos, ang)
     local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
     local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
     local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
-    local weight = self:GetValue("EFTWeight")
+    local eft_weight = self:GetValue("EFTWeight")
+    local nearwalldelta = self:GetNearWallAmount()
+    local bipodamount = self:GetBipodAmount()
+    local sprintdelta = self:GetSprintDelta()
 
-    if !reloading and eft_stances then
-        if weight > 6 then
-            local sprpos = lowreadyvector
-            local sprang = lowreadyangle
-            LerpVectorEdit(1, offsetpos, sprpos)
-            LerpAngleEdit(1, offsetang, sprang)
-        end
+    local target_low = (eft_weight > 6 and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
+    if eft_weight > 6 and self.lerp_low_vm > 0.001 then
+        --local sprpos = lowreadyvector
+        --local sprang = lowreadyangle
+        extra_offsetpos:Add(lowreadyvector * self.lerp_low_vm)
+        extra_offsetang:Add(lowreadyangle * self.lerp_low_vm)
+        --LerpVectorEdit(1, offsetpos, sprpos)
+        --LerpAngleEdit(1, offsetang, sprang)
     end
 
-    if !reloading then 
-        if eft_incorner == true then
-            local sprpos = cornervector
-            local sprang = cornerangle
-            LerpVectorEdit(1, offsetpos, sprpos)
-            LerpAngleEdit(1, offsetang, sprang)
-        end
+
+    local target_corner = (eft_incorner and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    self.lerp_corner_vm = Lerp(FrameTime() * 10, self.lerp_corner_vm or 0, target_corner)
+    if self.lerp_corner_vm > 0.001 then
+        --local sprpos = cornervector
+        --local sprang = cornerangle
+        extra_offsetpos:Add(cornervector * self.lerp_corner_vm)
+        extra_offsetang:Add(cornerangle * self.lerp_corner_vm)
+        --LerpVectorEdit(1, offsetpos, sprpos)
+        --LerpAngleEdit(1, offsetang, sprang)
     end
 
-    if !reloading then
-        if eft_inleftshoulder == true then
-            local sprpos = leftshouldervector
-            local sprang = leftshoulderangle
-            LerpVectorEdit(1, offsetpos, sprpos)
-            LerpAngleEdit(1, offsetang, sprang)
-        end
+    local target_left = (eft_inleftshoulder and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    self.lerp_left_vm = Lerp(FrameTime() * 8.5, self.lerp_left_vm or 0, target_left)
+    if self.lerp_left_vm > 0.001 then
+        --local sprpos = leftshouldervector
+        --local sprang = leftshoulderangle
+        extra_offsetpos:Add(leftshouldervector * self.lerp_left_vm)
+        extra_offsetang:Add(leftshoulderangle * self.lerp_left_vm)
+        --LerpVectorEdit(1, offsetpos, sprpos)
+        --LerpAngleEdit(1, offsetang, sprang)
     end
 
-    if !reloading then
-        if eft_insomalian == true then
-            local sprpos = somalianvector
-            local sprang = somalianangle
-            LerpVectorEdit(1, offsetpos, sprpos)
-            LerpAngleEdit(1, offsetang, sprang)
-        end
+    local target_somalian = (eft_insomalian and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    self.lerp_somalian_vm = Lerp(FrameTime() * 8, self.lerp_somalian_vm or 0, target_somalian)
+    if self.lerp_somalian_vm > 0.001 then
+        -- local sprpos = somalianvector
+        -- local sprang = somalianangle
+        extra_offsetpos:Add(somalianvector * self.lerp_somalian_vm)
+        extra_offsetang:Add(somalianangle * self.lerp_somalian_vm)
+        -- LerpVectorEdit(1, offsetpos, sprpos)
+        -- LerpAngleEdit(1, offsetang, sprang)
     end
 
     local getbipod = self:GetBipod()

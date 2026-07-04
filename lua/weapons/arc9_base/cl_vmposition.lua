@@ -188,7 +188,6 @@ function SWEP:GetViewModelPosition(pos, ang)
     -- if owner != LocalPlayer() then return end
     if CLIENT and owner ~= LocalPlayer() then return end
     local fraction = owner:GetNW2Float("leaning_fraction", 0)
-    local abs_fraction = math.abs(fraction)
 
     if !swepGetProcessedValue then swepGetProcessedValue = self.GetProcessedValue end
 
@@ -255,10 +254,11 @@ function SWEP:GetViewModelPosition(pos, ang)
     local nearwalldelta = self:GetNearWallAmount()
     local bipodamount = self:GetBipodAmount()
     local sprintdelta = self:GetSprintDelta()
+    local out = self:GetOutOfBreath()
 
-    local target_low = (eft_weight > 6 and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    local target_low = (eft_weight > 6 and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0 or out == true and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
     self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
-    if eft_weight > 6 and self.lerp_low_vm > 0.001 then
+    if self.lerp_low_vm > 0.001 then
         --local sprpos = lowreadyvector
         --local sprang = lowreadyangle
         extra_offsetpos:Add(lowreadyvector * self.lerp_low_vm)
@@ -356,6 +356,18 @@ function SWEP:GetViewModelPosition(pos, ang)
     --         offsetang = LerpAngle(curvedblindfirecornerdelta, offsetang, self:GetValue("BlindFireLeftAng"))
     --     end
     -- end
+    local lean_vector = Vector(1, 0, 1)
+    local lean_angle = Angle(0, 0, 10)
+    local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
+
+    self.lerp_lean = Lerp(FrameTime() * 10, target_fraction or 0, fraction)
+
+    print(self.lerp_lean)
+    
+    if math.abs(self.lerp_lean) > 0.001 then
+        offsetpos:Add(lean_vector * self.lerp_lean)
+        offsetang:Add(lean_angle * self.lerp_lean)
+    end
     if reloading then
         local reloadpos = swepGetProcessedValue(self, "ReloadPos", true)
         local reloadang = swepGetProcessedValue(self, "ReloadAng", true)

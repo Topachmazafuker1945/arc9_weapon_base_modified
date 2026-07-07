@@ -100,9 +100,15 @@ local lastpressed = false
 SWEP.IsHoldingBreath = false
 
 function SWEP:HoldingBreath()
-    if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
-    if self:GetSightAmount() < 0.05 then self.IsHoldingBreath = false return end
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) and 1 or 0
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) and 1 or 0
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) and 1 or 0
 
+    if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
+    --if self:GetSightAmount() < 0.05 then self.IsHoldingBreath = false return end
+    -- if self.Peeking then self.IsHoldingBreath = false return end
+    -- print(self.Peeking)
+    local IsHoldingWhile = (eft_inleftshoulder == 1 or eft_incorner == 1 or eft_insomalian == 1 or self:GetSightAmount() == 1)
     local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 
     if togglconvar:GetBool() then
@@ -110,12 +116,12 @@ function SWEP:HoldingBreath()
             self.IsHoldingBreath = !self.IsHoldingBreath
         end
     else
-        self.IsHoldingBreath = self:GetSightAmount() > 0.5
+        self.IsHoldingBreath = IsHoldingWhile
     end
 
     lastpressed = ownerkeydownspeed
 
-    return self:CanHoldBreath() and self.IsHoldingBreath and (self:GetSightAmount() > 0.5) and self:GetValue("HoldBreathTime") > 0
+    return self:CanHoldBreath() and self.IsHoldingBreath and self:GetValue("HoldBreathTime") > 0
 end
 
 local pp_amount = 0
@@ -153,13 +159,13 @@ function SWEP:HoldBreathPP()
 end
 
 function SWEP:HoldBreathHUD()
-    if self:GetSightAmount() < 1 then return end
+    --if self:GetSightAmount() < 1 then return end
     if self:GetValue("HoldBreathTime") <= 0 then return end
 
     if !hudconvar:GetBool() then return end
 
     local amt = self:GetBreath() / 100
-
+    
     if amt == 1 then return end
 
     local bar_w = ScreenScale(48)
@@ -195,11 +201,15 @@ function SWEP:HoldBreathHUD()
 end
 
 function SWEP:GetFreeSwayAmount()
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) and 1 or 0
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) and 1 or 0
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) and 1 or 0
+    local sight = self:GetSightAmount()
     if !swayconvar:GetBool() then return 0 end
     if !self:GetOwner():IsPlayer() then return 0 end
     local sway = self:GetProcessedValue("Sway")
     local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
-
+    
     sway = math.Max(sway, 0)
     if sway == 0 then return 0 end
 
@@ -207,10 +217,18 @@ function SWEP:GetFreeSwayAmount()
         if ownerkeydownspeed then 
             return sway * 0.25 
         end
+        if eft_incorner == 1 and sight < 0.4 or eft_insomalian == 1 and sight < 0.4 then
+            return sway * 1.5
+        end
+        if eft_inleftshoulder == 1 and sight < 0.4 then
+            return sway * 1.15
+        end 
     end
     
+
     if self:GetOutOfBreath() then
         sway = sway + ((1 - self:GetBreath() / 100) * 0.75)
+        print(sway)
     end
 
     return sway

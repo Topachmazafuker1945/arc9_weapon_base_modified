@@ -187,7 +187,6 @@ function SWEP:GetViewModelPosition(pos, ang)
     if !IsValid(owner) then return end
     -- if owner != LocalPlayer() then return end
     if CLIENT and owner ~= LocalPlayer() then return end
-    local fraction = owner:GetNW2Float("leaning_fraction", 0)
 
     if !swepGetProcessedValue then swepGetProcessedValue = self.GetProcessedValue end
 
@@ -268,7 +267,7 @@ function SWEP:GetViewModelPosition(pos, ang)
     end
 
 
-    local target_corner = (eft_incorner and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
+    local target_corner = (eft_incorner and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0 and out == false) and 1 or 0
     self.lerp_corner_vm = Lerp(FrameTime() * 10, self.lerp_corner_vm or 0, target_corner)
     if self.lerp_corner_vm > 0.001 then
         --local sprpos = cornervector
@@ -279,8 +278,8 @@ function SWEP:GetViewModelPosition(pos, ang)
         --LerpAngleEdit(1, offsetang, sprang)
     end
 
-    local target_left = (eft_inleftshoulder and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
-    self.lerp_left_vm = Lerp(FrameTime() * 8.5, self.lerp_left_vm or 0, target_left)
+    local target_left = (eft_inleftshoulder and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0 and out == false) and 1 or 0
+    self.lerp_left_vm = Lerp(FrameTime() * 2.5, self.lerp_left_vm or 0, target_left)
     if self.lerp_left_vm > 0.001 then
         --local sprpos = leftshouldervector
         --local sprang = leftshoulderangle
@@ -290,8 +289,8 @@ function SWEP:GetViewModelPosition(pos, ang)
         --LerpAngleEdit(1, offsetang, sprang)
     end
 
-    local target_somalian = (eft_insomalian and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0) and 1 or 0
-    self.lerp_somalian_vm = Lerp(FrameTime() * 8, self.lerp_somalian_vm or 0, target_somalian)
+    local target_somalian = (eft_insomalian and !reloading and nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0 and out == false) and 1 or 0
+    self.lerp_somalian_vm = Lerp(FrameTime() * 4, self.lerp_somalian_vm or 0, target_somalian)
     if self.lerp_somalian_vm > 0.001 then
         -- local sprpos = somalianvector
         -- local sprang = somalianangle
@@ -359,10 +358,10 @@ function SWEP:GetViewModelPosition(pos, ang)
     local lean_vector = Vector(1, 0, 1)
     local lean_angle = Angle(0, 0, 10)
     local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
-
+    local fraction = owner:GetNW2Float("leaning_fraction", 0)
+    
     self.lerp_lean = Lerp(FrameTime() * 10, target_fraction or 0, fraction)
-
-    print(self.lerp_lean)
+    --print(self.lerp_lean)
     
     if math.abs(self.lerp_lean) > 0.001 then
         offsetpos:Add(lean_vector * self.lerp_lean)

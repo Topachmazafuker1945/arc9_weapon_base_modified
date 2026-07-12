@@ -55,7 +55,7 @@ function SWEP:GetFreeSwayAngles()
     local swayamt = self:GetFreeSwayAmount()
     if swayamt == 0 then return end
 
-    local swayspeed = 1.5
+    local swayspeed = 2.5
     local isScope = self:IsUsingRTScope()
 
     swayamt = isScope and 0 or swayamt * (1-self:GetSightAmount() * 0.2)

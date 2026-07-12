@@ -106,8 +106,8 @@ function SWEP:HoldingBreath()
 
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
     --if self:GetSightAmount() < 0.05 then self.IsHoldingBreath = false return end
-    -- if self.Peeking then self.IsHoldingBreath = false return end
     -- print(self.Peeking)
+    if self.Peeking then self.IsHoldingBreath = false return end
     local IsHoldingWhile = (eft_inleftshoulder == 1 or eft_incorner == 1 or eft_insomalian == 1 or self:GetSightAmount() == 1)
     local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 

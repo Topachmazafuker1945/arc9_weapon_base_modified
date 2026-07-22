@@ -122,13 +122,13 @@ function SWEP:ToggleSafety(onoff)
     end
 
     local last = self:GetSafe()
-
+    --print(last)
     self:SetSafe(onoff)
-
+    
     if onoff != last then
         if IsFirstTimePredicted() then
             local soundtab1 = {
-                name = "safety",
+                name = "firemode",
                 sound = self:RandomChoice(self:GetProcessedValue("FiremodeSound", true)),
                 channel = ARC9.CHAN_FIDDLE
             }
@@ -146,12 +146,12 @@ function SWEP:ThinkFiremodes()
 	-- if CurTime() < self.FMHintTime +1 then return end
 
     if self:GetOwner():KeyPressed(IN_ZOOM) and self:GetOwner():KeyDown(IN_USE) then
-        self:ToggleSafety()
+        self:SwitchFiremode()
         return
     end
 
     if self:GetOwner():KeyPressed(IN_ZOOM) then
-        self:SwitchFiremode()
+        self:ToggleSafety()
     end
 end
 

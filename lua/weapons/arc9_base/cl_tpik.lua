@@ -34,13 +34,13 @@ local nearwallpos = Vector(5, -16, 0.5)
 local nearwallang = Angle(10, -80, -10)
 
 local lowreadyvector = Vector(-0.0, -0, -3.0)
-local highreadyvector = Vector(-0, -0, 0)
+local highreadyvector = Vector(-5, 0, 10)
 local somalianvector = Vector(-0.0, -0, -6.0)
 local cornervector = Vector(-6.0, -8, 6.0)
-local leftshouldervector = Vector(4, 10, -1)
+local leftshouldervector = Vector(0, 10, -0)
 
 local lowreadyangle = Angle(30, -10, -5)
-local highreadyangle = Angle(0, 0, 0)
+local highreadyangle = Angle(-30, 0, 0)
 local somalianangle = Angle(0, -0, -30)
 local cornerangle = Angle(0, -0, 20)
 local leftshoulderangle = Angle(0, -0, 0)
@@ -884,7 +884,7 @@ ARC9.TPIK.NativePoseLayers = true
 
 local function SetTPIKOffset(self, wm, owner, lp)
     local pos, ang = Vector(self.WorldModelOffset.TPIKPos or self.WorldModelOffset.Pos),
-        Angle(self.WorldModelOffset.TPIKAng or self.WorldModelOffset.Ang) -- how come you don't have tpikpos in 2025
+        Angle(self.WorldModelOffset.TPIKAng or self.WorldModelOffset.Ang) -- how come you don't have tpikpos in 2026 ;3 БЛЯ ПИСТОЛЕТ КАК ЧЛЕН НА ОБОСАННОМ УНИТАЗЕ ДЕРЖИТ ЕБАНЫЙ
     local sightdelta = self:GetSightAmount()
 
     if self.WorldModelOffset.TPIKPosAlternative and self:GetValue("TPIKAlternativePos") then
@@ -1024,10 +1024,12 @@ local function SetTPIKOffset(self, wm, owner, lp)
         local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
         local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+        local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
+        local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
         local eft_weight = self:GetValue("EFTWeight") or 0
         local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
 
-        local target_low = (eft_weight > 6 and can_use_stance or out and can_use_stance) and 1 or 0
+        local target_low = (eft_inlowready and can_use_stance or eft_weight > 6 and can_use_stance or out and can_use_stance) and 1 or 0
         self.lerp_low = Lerp(FrameTime() * 0.5, self.lerp_low or 0, target_low)
     
         if self.lerp_low > 0.001 then
@@ -1035,8 +1037,16 @@ local function SetTPIKOffset(self, wm, owner, lp)
             ang:Add(lowreadyangle * self.lerp_low)
         end
         
+        local target_high = (eft_inhighready and can_use_stance) and 1 or 0
+        self.lerp_high = Lerp(FrameTime() * 0.5, self.lerp_high or 0, target_high)
+        
+        if self.lerp_high > 0.001 then
+            pos:Add(highreadyvector * self.lerp_high)
+            ang:Add(highreadyangle * self.lerp_high)
+        end
+
         local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
-        self.lerp_left = Lerp(FrameTime() * 1.5, self.lerp_left or 0, target_left)
+        self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
     
         if self.lerp_left > 0.001 then
             pos:Add(leftshouldervector * self.lerp_left)
@@ -1052,7 +1062,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
 
         local target_somalian = (eft_insomalian and can_use_stance and !reloading and out == false) and 1 or 0
-        self.lerp_somalian = Lerp(FrameTime() * 1.5, self.lerp_somalian or 0, target_somalian)
+        self.lerp_somalian = Lerp(FrameTime() * 0.8, self.lerp_somalian or 0, target_somalian)
     
         if self.lerp_somalian > 0.001 then
             pos:Add(somalianvector * self.lerp_somalian)

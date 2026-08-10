@@ -100,26 +100,28 @@ local lastpressed = false
 SWEP.IsHoldingBreath = false
 
 function SWEP:HoldingBreath()
-    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) and 1 or 0
-    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) and 1 or 0
-    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) and 1 or 0
 
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
-    --if self:GetSightAmount() < 0.05 then self.IsHoldingBreath = false return end
-    -- print(self.Peeking)
-    if self.Peeking then self.IsHoldingBreath = false return end
-    local IsHoldingWhile = (eft_inleftshoulder == 1 or eft_incorner == 1 or eft_insomalian == 1 or self:GetSightAmount() == 1)
-    local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
+    
+    local weight = self:GetValue("EFTWeight") or 0
+    if self.EFTCombatStances == false or (weight > 6 or self:GetOutOfBreath()) and self:GetSightAmount() < 0.8 then return end
+    local IsHoldingWhile = ((self:GetNW2Bool("EFT_LowReadyStance", false) or self:GetNW2Bool("EFT_HighReadyStance", false) or self:GetSafe()) and self:GetSightAmount() < 0.8)
+    -- local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 
-    if togglconvar:GetBool() then
-        if ownerkeydownspeed and !lastpressed then
-            self.IsHoldingBreath = !self.IsHoldingBreath
-        end
+    -- if togglconvar:GetBool() then
+    --     if ownerkeydownspeed and !lastpressed then
+    --         self.IsHoldingBreath = !self.IsHoldingBreath
+    --     end
+    -- else
+    --     self.IsHoldingBreath = IsHoldingWhile
+    -- end
+
+    if !IsHoldingWhile then
+        self.IsHoldingBreath = true
     else
-        self.IsHoldingBreath = IsHoldingWhile
+        self.IsHoldingBreath = false
     end
 
-    lastpressed = ownerkeydownspeed
 
     return self:CanHoldBreath() and self.IsHoldingBreath and self:GetValue("HoldBreathTime") > 0
 end
@@ -214,9 +216,14 @@ function SWEP:GetFreeSwayAmount()
     if sway == 0 then return 0 end
 
     if self:HoldingBreath() then
-        if ownerkeydownspeed then 
-            return sway * 0.25 
+        if togglconvar:GetBool() then
+            if ownerkeydownspeed and !lastpressed then
+                return sway * 0.25
+            end
+        elseif ownerkeydownspeed then
+            return sway * 0.25
         end
+
         if eft_incorner == 1 and sight < 0.4 or eft_insomalian == 1 and sight < 0.4 then
             return sway * 1.5
         end
@@ -228,8 +235,18 @@ function SWEP:GetFreeSwayAmount()
 
     if self:GetOutOfBreath() then
         sway = sway + ((1 - self:GetBreath() / 100) * 0.75)
-        print(sway)
     end
 
     return sway
 end
+
+
+    -- local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
+
+    -- if togglconvar:GetBool() then
+    --     if ownerkeydownspeed and !lastpressed then
+    --         self.IsHoldingBreath = !self.IsHoldingBreath
+    --     end
+    -- else
+    --     self.IsHoldingBreath = IsHoldingWhile
+    -- end

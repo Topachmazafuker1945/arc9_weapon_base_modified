@@ -27,23 +27,25 @@ local arc9_tpik_native_layer_speed = GetConVar("arc9_tpik_native_layer_speed") o
     CreateClientConVar("arc9_tpik_native_layer_speed", "14", true, false, "", 1, 60)
 local TPIKHelperBonePatchRuntimeDisabled = false
 
+
 local activeposvector = Vector(-1, -1, 1)
 local peekvector = Vector(0, 2, 4)
 local someangforsights = Angle(3, -3, -8)
 local nearwallpos = Vector(5, -16, 0.5)
 local nearwallang = Angle(10, -80, -10)
 
-local lowreadyvector = Vector(-0.0, -0, -3.0)
-local highreadyvector = Vector(-5, 0, 10)
-local somalianvector = Vector(-0.0, -0, -6.0)
-local cornervector = Vector(-6.0, -8, 6.0)
-local leftshouldervector = Vector(0, 10, -0)
+-- local lowreadyvector = Vector(-0.0, -0, -3.0)
+-- local highreadyvector = Vector(-5, 0, 10)
+-- local somalianvector = Vector(-0.0, -0, -6.0)
+-- local cornervector = Vector(-6.0, -8, 6.0)
+-- local leftshouldervector = Vector(0, 10, -0)
 
-local lowreadyangle = Angle(30, -10, -5)
-local highreadyangle = Angle(-30, 0, 0)
-local somalianangle = Angle(0, -0, -30)
-local cornerangle = Angle(0, -0, 20)
-local leftshoulderangle = Angle(0, -0, 0)
+-- local lowreadyangle = Angle(30, -10, -5)
+-- local highreadyangle = Angle(-30, 0, 0)
+-- local somalianangle = Angle(0, -0, -30)
+-- local cornerangle = Angle(0, -0, 20)
+-- local leftshoulderangle = Angle(0, -0, 0)
+
 
 local PlayerReanimsOffsets = {
     default = {
@@ -515,7 +517,7 @@ local function TPIKAPI_GetCurrentArmState(wep)
         inspecting = TPIKAPI_CallBool(wep, "GetInspecting", false),
         noTPIK = wep.NoTPIK or wep.GetProcessedValue and wep:GetProcessedValue("NoTPIK", true) or false,
         lastWasSprinting = TPIKAPI_CallBool(wep, "GetLastWasSprinting", false),
-        temporaryOverride = TPIKAPI_GetTemporaryOverride(wep)
+        temporaryOverride = TPIKAPI_GetTemporaryOverride(wep),
     }
 end
 
@@ -1003,70 +1005,79 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
     end
 
-    --[[local TPIKvector_lowready = self:GetValue (self, "TPIKLowReadyVector", true)
-    local TPIKvector_highready = self:GetValue(self, "TPIKHighReadyVector", true)
-    local TPIKvector_leftshoulder = self:GetValue(self, "TPIKLeftShoulderVector", true)
-    local TPIKvector_corner = self:GetValue(self, "TPIKCornerVector", true)
-    local TPIKvector_somalian = self:GetValue(self, "TPIKSomalianVector", true)
+    local ply = LocalPlayer() -- KRUTIE STANCES EPTA
+    local wep = ply:GetActiveWeapon()
+    if IsValid(ply) then
+        if wep.EFTCombatStances then
+            do  
+                local sightamount = self:GetSightAmount()
+                local reloading = self:GetReloading()
+                local nearwalldelta = self:GetNearWallAmount()
+                local bipodamount = self:GetBipodAmount()
+                local out = self:GetOutOfBreath()
 
-    local TPIKangle_lowready = self:GetValue(self, "TPIKLowReadyAngle", true)
-    local TPIKangle_highready = self:GetValue(self, "TPIKHighReadyAngle", true)
-    local TPIKangle_leftshoulder = self:GetValue(self, "TPIKLeftShoulderAngle", true)
-    local TPIKangle_corner = self:GetValue(self, "TPIKCornerAngle", true)
-    local TPIKangle_somalian = self:GetValue(self, "TPIKSomalianAngle", true)]]
+                local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
+                local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+                local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+                local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
+                local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
 
-    do  
-        local sightamount = self:GetSightAmount()
-        local reloading = self:GetReloading()
-        local nearwalldelta = self:GetNearWallAmount()
-        local bipodamount = self:GetBipodAmount()
-        local out = self:GetOutOfBreath()
-        local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
-        local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
-        local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
-        local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
-        local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
-        local eft_weight = self:GetValue("EFTWeight") or 0
-        local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
+                local lowreadyvector = wep.TPIKLowReadyVector --parasha nado buden peredelat too fucking much stuff for think
+                local highreadyvector = wep.TPIKHighReadyVector
+                local somalianvector = wep.TPIKSomalianVector
+                local cornervector = wep.TPIKCornerVector
+                local leftshouldervector = wep.TPIKLeftShoulderVector
 
-        local target_low = (eft_inlowready and can_use_stance or eft_weight > 6 and can_use_stance or out and can_use_stance) and 1 or 0
-        self.lerp_low = Lerp(FrameTime() * 0.5, self.lerp_low or 0, target_low)
-    
-        if self.lerp_low > 0.001 then
-            pos:Add(lowreadyvector * self.lerp_low)
-            ang:Add(lowreadyangle * self.lerp_low)
-        end
-        
-        local target_high = (eft_inhighready and can_use_stance) and 1 or 0
-        self.lerp_high = Lerp(FrameTime() * 0.5, self.lerp_high or 0, target_high)
-        
-        if self.lerp_high > 0.001 then
-            pos:Add(highreadyvector * self.lerp_high)
-            ang:Add(highreadyangle * self.lerp_high)
-        end
+                local lowreadyangle = wep.TPIKLowReadyAngle
+                local highreadyangle = wep.TPIKHighReadyAngle
+                local somalianangle = wep.TPIKSomalianAngle
+                local cornerangle = wep.TPIKCornerAngle
+                local leftshoulderangle = wep.TPIKLeftShoulderAngle
 
-        local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
-        self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
-    
-        if self.lerp_left > 0.001 then
-            pos:Add(leftshouldervector * self.lerp_left)
-            ang:Add(leftshoulderangle * self.lerp_left)
-        end
 
-        local target_corner = (eft_incorner and can_use_stance and !reloading and out == false) and 1 or 0
-        self.lerp_corner = Lerp(FrameTime() * 1.5, self.lerp_corner or 0, target_corner)
-    
-        if self.lerp_corner > 0.001 then
-            pos:Add(cornervector * self.lerp_corner)
-            ang:Add(cornerangle * self.lerp_corner)
-        end
+                local eft_weight = self:GetValue("EFTWeight") or 0
+                local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
 
-        local target_somalian = (eft_insomalian and can_use_stance and !reloading and out == false) and 1 or 0
-        self.lerp_somalian = Lerp(FrameTime() * 0.8, self.lerp_somalian or 0, target_somalian)
-    
-        if self.lerp_somalian > 0.001 then
-            pos:Add(somalianvector * self.lerp_somalian)
-            ang:Add(somalianangle * self.lerp_somalian)
+                local target_low = (eft_inlowready and can_use_stance or eft_weight > 6 and can_use_stance or out and can_use_stance) and 1 or 0
+                self.lerp_low = Lerp(FrameTime() * 0.8, self.lerp_low or 0, target_low)
+            
+                if self.lerp_low > 0.001 then
+                    pos:Add(lowreadyvector * self.lerp_low)
+                    ang:Add(lowreadyangle * self.lerp_low)
+                end
+                
+                local target_high = (eft_inhighready and can_use_stance) and 1 or 0
+                self.lerp_high = Lerp(FrameTime() * 0.75, self.lerp_high or 0, target_high)
+                
+                if self.lerp_high > 0.001 then
+                    pos:Add(highreadyvector * self.lerp_high)
+                    ang:Add(highreadyangle * self.lerp_high)
+                end
+
+                local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
+                self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
+            
+                if self.lerp_left > 0.001 then
+                    pos:Add(leftshouldervector * self.lerp_left)
+                    ang:Add(leftshoulderangle * self.lerp_left)
+                end
+
+                local target_corner = (eft_incorner and can_use_stance and !reloading and out == false) and 1 or 0
+                self.lerp_corner = Lerp(FrameTime() * 1.5, self.lerp_corner or 0, target_corner)
+            
+                if self.lerp_corner > 0.001 then
+                    pos:Add(cornervector * self.lerp_corner)
+                    ang:Add(cornerangle * self.lerp_corner)
+                end
+
+                local target_somalian = (eft_insomalian and can_use_stance and !reloading and out == false) and 1 or 0
+                self.lerp_somalian = Lerp(FrameTime() * 0.8, self.lerp_somalian or 0, target_somalian)
+            
+                if self.lerp_somalian > 0.001 then
+                    pos:Add(somalianvector * self.lerp_somalian)
+                    ang:Add(somalianangle * self.lerp_somalian)
+                end
+            end
         end
     end
 

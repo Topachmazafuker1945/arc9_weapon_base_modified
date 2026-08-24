@@ -815,8 +815,8 @@ L["settings.convar_client"] = "Cwient wawiabwe"
 -- L["settings.server.gameplay.breath_slowmo.title"] = "Enable Slow-Mo when Holding Breath (Singleplayer)"
 -- L["settings.server.gameplay.breath_slowmo.desc"] = "! Singleplayer Only !\nHolding your breath slows down time."
 
--- L["settings.gameplay.togglebreath.title"] = "Toggle Holding Breath"
--- L["settings.gameplay.togglebreath.desc"] = "Pressing your sprint button toggles holding breath."
+L["settings.gameplay.togglebreath.title"] = "! ToWoggle Holding Breath !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT UwUSE PLZ!!! Owo"
 
 -- L["settings.centerhint.breath_hud.title"] = "Hold Breath Tooltip"
 -- L["settings.centerhint.breath_hud.desc"] = "Displays a bar with your remaining breath when holding your breath."

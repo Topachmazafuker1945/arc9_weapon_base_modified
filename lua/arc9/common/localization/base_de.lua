@@ -815,8 +815,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "Aktiviert Waffen-Schwanken (wenn 
 L["settings.server.gameplay.breath_slowmo.title"] = "Zeitlupe beim Atemanhalten aktiveren (Einzelspieler)"
 L["settings.server.gameplay.breath_slowmo.desc"] = "! Nur Einzelspieler !\nAnhalten des Atems verlangsamt die Zeit."
 
-L["settings.gameplay.togglebreath.title"] = "Atemanhalten umschalten"
-L["settings.gameplay.togglebreath.desc"] = "Drücken des Sprinten-Knopfes schaltet das Luftanhalten um."
+L["settings.gameplay.togglebreath.title"] = "! Atemanhalten umschalten !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT USE PLZ!!!"
 
 L["settings.centerhint.breath_hud.title"] = "Atemanhalten-Tooltip"
 L["settings.centerhint.breath_hud.desc"] = "Zeigt einen Balken mit verbleibender Luft, beim Anhalten des Atems."

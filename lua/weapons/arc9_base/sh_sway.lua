@@ -10,6 +10,7 @@ local swayconvar = GetConVar("arc9_mod_sway")
 function SWEP:ThinkHoldBreath()
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
     if !self:GetOwner():IsPlayer() then return end
+    local weight = self:GetValue("EFTWeight") or 0
     local holdbreathtime = self:GetValue("HoldBreathTime")
     if holdbreathtime <= 0 then return end
 
@@ -75,15 +76,27 @@ function SWEP:ThinkHoldBreath()
 
             if CLIENT then self:PlayTranslatedSound(soundtab) end
         end
-
-        self:SetBreath(self:GetBreath() + (FrameTime() * 100 / self:GetProcessedValue("RestoreBreathTime", true)))
-        if self:GetBreath() >= 100 then
-            self:SetBreath(100)
-            self:SetOutOfBreath(false)
+        -- if !self.IsHoldingBreath then 
+        if self.GetSightAmount() <= 0 and self:GetOutOfBreath() and weight < 8 or !self.IsHoldingBreath then
+            self:SetBreath(self:GetBreath() + (FrameTime() * 100 / self:GetProcessedValue("RestoreBreathTime", true)))
+            if self:GetBreath() >= 100 then
+                self:SetBreath(100)
+                self:SetOutOfBreath(false)
+            end
+        elseif self.IsHoldingBreath and weight < 8 then  
+            self:SetBreath(self:GetBreath() - (FrameTime() * 100 / holdbreathtime))
+        elseif self.GetSightAmount() <= 0 and weight > 8 then
+            self:SetBreath(self:GetBreath() + (FrameTime() * 100 / self:GetProcessedValue("RestoreBreathTime", true)))
+            if self:GetBreath() >= 100 then
+                self:SetBreath(100)
+                self:SetOutOfBreath(false)
+            end
+        else
+            self:SetBreath(self:GetBreath() - (FrameTime() * 100 / holdbreathtime))
         end
-    end
+    end -- holy shit coding
 
-    if game.SinglePlayer() and SERVER and slomoconvar:GetBool() then
+    if game.SinglePlayer() and SERVER and !slomoconvar:GetBool() then
         local ts = game.GetTimeScale()
 
         ts = math.Approach(ts, target_ts, FrameTime() / ts / 0.5)
@@ -104,7 +117,7 @@ function SWEP:HoldingBreath()
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
     
     local weight = self:GetValue("EFTWeight") or 0
-    if self.EFTCombatStances == false or (weight > 6 or self:GetOutOfBreath()) and self:GetSightAmount() < 0.8 then return end
+    if self.EFTCombatStances == false or (weight > 8 or self:GetOutOfBreath()) and self:GetSightAmount() < 0.8 or self:GetBipod() then return end
     local IsHoldingWhile = ((self:GetNW2Bool("EFT_LowReadyStance", false) or self:GetNW2Bool("EFT_HighReadyStance", false) or self:GetSafe()) and self:GetSightAmount() < 0.8)
     -- local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 
@@ -142,11 +155,11 @@ function SWEP:HoldBreathPP()
 
     pp_amount = math.Approach(pp_amount, target, FrameTime() / 0.25)
 
-    --DrawSharpen((0.5 * pp_amount) + (1.2 * amt_d), 2 * pp_amount)
+    DrawSharpen((0.5 * pp_amount) + (1.2 * amt_d), 2 * pp_amount)
 
     local tint = Color(253, 255, 255)
 
-    --[[local tab = {
+    local tab = {
         [ "$pp_colour_addr" ] = (-1 + (tint.r / 255)) * pp_amount,
         [ "$pp_colour_addg" ] = (-1 + (tint.g / 255)) * pp_amount,
         [ "$pp_colour_addb" ] = (-1 + (tint.b / 255)) * pp_amount,
@@ -157,7 +170,7 @@ function SWEP:HoldBreathPP()
         [ "$pp_colour_mulg" ] = 0,
         [ "$pp_colour_mulb" ] = 0
     }
-    DrawColorModify(tab)]]--
+    DrawColorModify(tab)
 end
 
 function SWEP:HoldBreathHUD()
@@ -203,50 +216,82 @@ function SWEP:HoldBreathHUD()
 end
 
 function SWEP:GetFreeSwayAmount()
-    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) and 1 or 0
-    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) and 1 or 0
-    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) and 1 or 0
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+    local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
+    local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
     local sight = self:GetSightAmount()
     if !swayconvar:GetBool() then return 0 end
     if !self:GetOwner():IsPlayer() then return 0 end
     local sway = self:GetProcessedValue("Sway")
     local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
+    local ownerkeypressedspeed = self:GetOwner():KeyPressed(IN_SPEED)
     
     sway = math.Max(sway, 0)
     if sway == 0 then return 0 end
 
     if self:HoldingBreath() then
         if togglconvar:GetBool() then
-            if ownerkeydownspeed and !lastpressed then
-                return sway * 0.25
+            if ownerkeypressedspeed then
+                timer.Simple( 0.5, function()
+                    print("xyi")
+                end)
             end
         elseif ownerkeydownspeed then
             return sway * 0.25
         end
-
-        if eft_incorner == 1 and sight < 0.4 or eft_insomalian == 1 and sight < 0.4 then
-            return sway * 1.5
+        
+        if (eft_incorner or eft_insomalian) and sight < 0.4 then
+            return sway * 1.2
         end
-        if eft_inleftshoulder == 1 and sight < 0.4 then
-            return sway * 1.15
+        if eft_inleftshoulder and sight < 0.4 then
+            return sway * 1.1
         end 
     end
     
+    -- if eft_inlowready or eft_inhighready then
+    --     return sway * 0.5
+    -- end
 
-    if self:GetOutOfBreath() then
-        sway = sway + ((1 - self:GetBreath() / 100) * 0.75)
+    if self:GetOutOfBreath() and sight > 0 then
+        sway = sway + ((1 - self:GetBreath() / 100) * 0.9)
     end
 
     return sway
 end
 
+function SWEP:GetSwaySpeedAmount()
+    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) and 1 or 0
+    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) and 1 or 0
+    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) and 1 or 0
+    local sight = self:GetSightAmount()
+    if !swayconvar:GetBool() then return 0 end
+    if !self:GetOwner():IsPlayer() then return 0 end
+    local swayspeed = self:GetProcessedValue("Swayspeed")
+    local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 
-    -- local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
+    if swayspeed == 0 then return end
 
-    -- if togglconvar:GetBool() then
-    --     if ownerkeydownspeed and !lastpressed then
-    --         self.IsHoldingBreath = !self.IsHoldingBreath
-    --     end
-    -- else
-    --     self.IsHoldingBreath = IsHoldingWhile
+    if self:HoldingBreath() then
+        if self:GetBreath() < 10 then
+            return swayspeed * 3.5
+        elseif self:GetBreath() < 25 then
+            return swayspeed * 2.5
+        elseif self:GetBreath() < 50 then
+            return swayspeed * 1.5            
+        end
+    end
+
+    -- if self:GetOutOfBreath() then
+    --     return swayspeed * 2
     -- end
+    -- if (eft_incorner or eft_insomalian) and sight < 0.4 then
+    --     return swayspeed * 3
+    -- end
+    -- if eft_inleftshoulder and sight < 0.4 then
+    --     return swayspeed * 3
+    -- end 
+
+    return swayspeed
+end

@@ -815,8 +815,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "Las armas tendrán estabilidad, s
 L["settings.server.gameplay.breath_slowmo.title"] = "Respiración Slow-Mo"
 L["settings.server.gameplay.breath_slowmo.desc"] = "Contener la respiración ralentiza el tiempo.\n\nNo disponible en multijugador."
 
-L["settings.gameplay.togglebreath.title"] = "Alternar contener la respiración"
-L["settings.gameplay.togglebreath.desc"] = "Al pulsar la tecla Contener la respiración se activará Contener la respiración en lugar de tener que mantenerla pulsada."
+L["settings.gameplay.togglebreath.title"] = "! Alternar contener la respiración !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT USE PLZ!!!"
 
 L["settings.centerhint.breath_hud.title"] = "HUD de respiración"
 L["settings.centerhint.breath_hud.desc"] = "Muestra una barra que indica el aliento que te queda mientras estabilizas el arma en la mira."

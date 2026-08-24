@@ -1005,7 +1005,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
     end
 
-    local ply = LocalPlayer() -- KRUTIE STANCES EPTA
+    local ply = LocalPlayer() -- KRUTIE STANCES EPTA 
     local wep = ply:GetActiveWeapon()
     if IsValid(ply) then
         if wep.EFTCombatStances then
@@ -1022,7 +1022,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
                 local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
                 local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
 
-                local lowreadyvector = wep.TPIKLowReadyVector --parasha nado buden peredelat too fucking much stuff for think
+                local lowreadyvector = wep.TPIKLowReadyVector --parasha nado buden peredelat too fucking much stuff
                 local highreadyvector = wep.TPIKHighReadyVector
                 local somalianvector = wep.TPIKSomalianVector
                 local cornervector = wep.TPIKCornerVector
@@ -1038,7 +1038,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
                 local eft_weight = self:GetValue("EFTWeight") or 0
                 local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
 
-                local target_low = (eft_inlowready and can_use_stance or eft_weight > 6 and can_use_stance or out and can_use_stance) and 1 or 0
+                local target_low = (eft_inlowready and can_use_stance or eft_weight > 8 and can_use_stance or out and can_use_stance) and 1 or 0
                 self.lerp_low = Lerp(FrameTime() * 0.8, self.lerp_low or 0, target_low)
             
                 if self.lerp_low > 0.001 then

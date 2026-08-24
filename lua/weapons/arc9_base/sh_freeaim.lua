@@ -54,13 +54,13 @@ function SWEP:GetFreeSwayAngles()
     local ct = CurTime()
     local swayamt = self:GetFreeSwayAmount()
     if swayamt == 0 then return end
-
-    local swayspeed = 2.5
+-- self:GetSwaySpeedAmount()
+    local swayspeed = self:GetSwaySpeedAmount()
     local isScope = self:IsUsingRTScope()
 
     swayamt = isScope and 0 or swayamt * (1-self:GetSightAmount() * 0.2)
     smoothswayamt = CLIENT and Lerp(RealFrameTime() * 2, smoothswayamt, swayamt) or swayamt
-    if self:GetOutOfBreath() then swayspeed = 2.25 end
+    if self:GetOutOfBreath() then swayspeed = swayspeed + 2 end
     
     local ang = Angle(math.sin(ct * 0.6 * swayspeed) + (math.cos(ct * 2 * swayspeed) * 0.5), math.sin(ct * 0.4 * swayspeed) + (math.cos(ct * 1.6 * swayspeed) * 0.5), 0)
     

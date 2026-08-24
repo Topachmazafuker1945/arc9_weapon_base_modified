@@ -813,8 +813,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "Некоторые настрое
 L["settings.server.gameplay.breath_slowmo.title"] = "Слоу-мо в задержке дыхания"
 L["settings.server.gameplay.breath_slowmo.desc"] = "Задерживание дыхания будет замедлять течение времени.\n\nТолько в одиночной игре."
 
-L["settings.gameplay.togglebreath.title"] = "Задержка дыхания по нажатию"
-L["settings.gameplay.togglebreath.desc"] = "Вместо удерживания кнопки задержки дыхания достаточно нажать один раз."
+L["settings.gameplay.togglebreath.title"] = "! Задержка дыхания по нажатию, не используйте !"
+L["settings.gameplay.togglebreath.desc"] = "НЕ ИСПОЛЬЗОВАТЬ!!!!"
 
 L["settings.centerhint.breath_hud.title"] = "Индикатор"
 L["settings.centerhint.breath_hud.desc"] = "Показывать, сколько вы можете ещё задерживать дыхание в прицелах в интерфейсе."

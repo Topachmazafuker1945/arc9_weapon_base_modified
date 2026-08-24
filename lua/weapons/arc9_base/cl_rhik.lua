@@ -20,10 +20,12 @@ function SWEP:DoRHIK(wm)
     local rh_delta = 1
     -- local lhik_bf_d = self:GetBlindFireAmount() - (math.abs(self:GetBlindFireCornerAmount()))
     local hasonehandsprint = self:GetValue("OneHandedSprint")
+    local high_ready = self:GetNW2Bool("EFT_HighReadyStance", false)
+    local weight = self:GetValue("EFTWeight")
     local hide_lh_d = 0
     local hide_rh_d = 0
     hide_lh_d = self.CustomizeDelta
-    if hasonehandsprint then hide_lh_d = hide_lh_d + self:GetSprintAmount() end
+    if (hasonehandsprint or high_ready) and weight < 4 then hide_lh_d = hide_lh_d + self:GetSprintAmount() end
     hide_rh_d = self.CustomizeDelta
     hide_lh_d = math.ease.InExpo(hide_lh_d)
     hide_rh_d = math.ease.InCubic(hide_rh_d)
@@ -296,7 +298,7 @@ function SWEP:DoRHIK(wm)
             local vm_ang = vmtransform:GetAngles()
             local newtransform = Matrix()
 
-            if hasonehandsprint and hide_rh_d == 0 then
+            if hasonehandsprint or high_ready and hide_rh_d == 0 then
                 newtransform:SetTranslation(LerpVector(hide_lh_d, vm_pos, vm_pos - (EyeAngles():Up() * 16) - (EyeAngles():Forward() * 9) - (EyeAngles():Right() * 12)))
             else
                 newtransform:SetTranslation(LerpVector(hide_lh_d, vm_pos, vm_pos - (EyeAngles():Up() * 48) - (EyeAngles():Forward() * 16)))

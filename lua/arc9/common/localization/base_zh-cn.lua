@@ -818,8 +818,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "启用武器摇摆功能\n(如果
 L["settings.server.gameplay.breath_slowmo.title"] = "屏住呼吸时启用慢动作(单人游戏)"
 L["settings.server.gameplay.breath_slowmo.desc"] = "! 仅限单人游戏 !\n屏住呼吸让时间变慢."
 
-L["settings.gameplay.togglebreath.title"] = "切换屏气"
-L["settings.gameplay.togglebreath.desc"] = "按下冲刺按键可切换屏住呼吸."
+L["settings.gameplay.togglebreath.title"] = "! 切换屏气 !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT USE PLZ!!!."
 
 L["settings.centerhint.breath_hud.title"] = "屏住呼吸工具提示"
 L["settings.centerhint.breath_hud.desc"] = "屏住呼吸时，显示剩余呼吸量的条形图."

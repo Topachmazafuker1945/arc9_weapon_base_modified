@@ -791,8 +791,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "화기가 흔들리게 하는 기
 L["settings.server.gameplay.breath_slowmo.title"] = "숨 참기 시 느린모션 활성화 (싱글플레이 전용)"
 L["settings.server.gameplay.breath_slowmo.desc"] = "! 싱글플레이 전용입니다 !\n숨을 참으면 시간이 느려집니다."
 
-L["settings.gameplay.togglebreath.title"] = "숨참기 전환 방식 변경"
-L["settings.gameplay.togglebreath.desc"] = "전력질주 버튼을 눌러 숨참기 상태를 고정 혹은 홀드 방식으로 변경합니다."
+L["settings.gameplay.togglebreath.title"] = "! 숨참기 전환 방식 변경 !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT USE PLZ!!!"
 
 L["settings.centerhint.breath_hud.title"] = "숨 참기 툴팁"
 L["settings.centerhint.breath_hud.desc"] = "숨을 참을 때 남은 호흡량을 표시합니다."

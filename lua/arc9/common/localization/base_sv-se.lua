@@ -815,8 +815,8 @@ L["settings.server.gameplay.mod_sway.desc"] = "Aktivera vapensvängning (om vapn
 L["settings.server.gameplay.breath_slowmo.title"] = "Aktivera Slow-Mo när du Håller Andan (Enspelare)"
 L["settings.server.gameplay.breath_slowmo.desc"] = "! Endast Enspelareläge !\nTiden saktar ner när du håller andan."
 
-L["settings.gameplay.togglebreath.title"] = "Växla Håll Andan"
-L["settings.gameplay.togglebreath.desc"] = "Trycker du på din spring knapp så växlar det på/av att du håller andan."
+L["settings.gameplay.togglebreath.title"] = "! Växla Håll Andan !"
+L["settings.gameplay.togglebreath.desc"] = "!!!DO NOT USE PLZ!!!"
 
 L["settings.centerhint.breath_hud.title"] = "Håll Andan Verktygstips"
 L["settings.centerhint.breath_hud.desc"] = "Visar en bar med kvarstående anda när du håller andan."

@@ -7,6 +7,8 @@ SWEP.BenchGunViewModelAng = nil
 local lht = 0
 local sht = 0
 
+local zeropos = Vector(0, 0, 0)
+local zeroang = Angle(0, 0, 0)
 -- local somevector = Vector(-1, 0, 1)
 -- local somevector2 = Vector(0, 1, 0)
 local somevector3 = Vector(-1, -1, 1)
@@ -24,6 +26,8 @@ local vmAddX = GetConVar("arc9_vm_addx")
 local vmAddY = GetConVar("arc9_vm_addy")
 local vmAddZ = GetConVar("arc9_vm_addz")
 local arc9DevBenchGun = GetConVar("arc9_dev_benchgun")
+local vmleaning = GetConVar("eft_vmleaning")
+local insight_vmleaning = GetConVar("eft_insight_vmleaning")
 local isSingleplayer = game.SinglePlayer()
 
 --[[local lowreadyvector = Vector(-2.0, -5, 1.0)
@@ -258,9 +262,10 @@ function SWEP:GetViewModelPosition(pos, ang)
         local bipodamount = self:GetBipodAmount()
         local sprintdelta = self:GetSprintDelta()
         local out = self:GetOutOfBreath()
-
         local can_stance = (nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0)
-        local target_low = (eft_inlowready and can_stance or eft_weight > 6 and can_stance or out == true and can_stance) and 1 or 0
+
+        -- local target_low = (eft_inlowready or can_stance or eft_weight > 8 and can_stance or out == true and can_stance) and 1 or 0
+        local target_low = ((eft_inlowready or eft_weight > 8 or out == true) and can_stance) and 1 or 0
         --print(eft_inlowready)
         self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
         if self.lerp_low_vm > 0.001 then
@@ -272,7 +277,7 @@ function SWEP:GetViewModelPosition(pos, ang)
             --LerpAngleEdit(1, offsetang, sprang)
         end
 
-        local target_high = (eft_inhighready and can_stance and eft_weight < 6 and out == false) and 1 or 0
+        local target_high = (eft_inhighready and can_stance and eft_weight < 8 and out == false) and 1 or 0
         self.lerp_high_vm = Lerp(FrameTime() * 10, self.lerp_high_vm or 0, target_high)
         if self.lerp_high_vm > 0.001 then
             --local sprpos = cornervector
@@ -372,17 +377,18 @@ function SWEP:GetViewModelPosition(pos, ang)
     --     end
     -- end
     local lean_vector = Vector(1, 0, 1)
-    local lean_angle = Angle(0, 0, 10)
+    local lean_angle = Angle(0, 0, 15)
     local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
     local fraction = owner:GetNW2Float("leaning_fraction", 0)
     
-    self.lerp_lean = Lerp(FrameTime() * 10, target_fraction or 0, fraction)
+    self.lerp_lean = Lerp(FrameTime() * 0.5, target_fraction or 0, fraction)
     --print(self.lerp_lean)
     
     if math.abs(self.lerp_lean) > 0.001 then
         offsetpos:Add(lean_vector * self.lerp_lean)
         offsetang:Add(lean_angle * self.lerp_lean)
     end
+    
     if reloading then
         local reloadpos = swepGetProcessedValue(self, "ReloadPos", true)
         local reloadang = swepGetProcessedValue(self, "ReloadAng", true)
@@ -413,7 +419,6 @@ function SWEP:GetViewModelPosition(pos, ang)
     local sightdelta = sightdelta_original
     -- cor_val = Lerp(sightdelta, cor_val, 1)
     self.SwayScale = 0
-
 
     if sightdelta > 0 then
         local insifgts = self:GetInSights()
@@ -459,11 +464,29 @@ function SWEP:GetViewModelPosition(pos, ang)
             pos:Add(angUp)
             LerpVectorEdit(sightdelta, offsetpos, vector_origin)
             LerpAngleEdit(sightdelta, offsetang, angle_zero)
+
         else
             offsetpos = LerpVectorFunny(sightdelta_original, offsetpos or vector_origin, sightpos or vector_origin, insifgts)
             offsetang = LerpAngleFunny(sightdelta, offsetang or angle_zero, sightang or angle_zero, insifgts)
         end
 
+        --a little bit crookedly and silly thing need to do something with sight code i guess
+        local lean_vector_negative = Vector(-0.1, 0, -1.1) --left
+        local lean_vector = Vector(0.35, 0, 1.05) --right
+        local lean_angle_negative = Angle(0, 0, 15)
+        local lean_angle = Angle(0, 0, 15)
+
+        self.lerp_leansight_start = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
+        -- self.lerp_leansight_end = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
+        
+        if self.lerp_leansight_start > 0 then
+            offsetpos:Add(lean_vector * math.abs(self.lerp_leansight_start))
+            offsetang:Add(lean_angle * self.lerp_leansight_start)
+        else
+            offsetpos:Add(lean_vector_negative * math.abs(self.lerp_leansight_start))
+            offsetang:Add(lean_angle_negative * self.lerp_leansight_start)
+        end        
+                     
         -- local eepos, eeang = Vector(0, 0, 0), Angle(0, 0, 0)
         -- local im = swepGetProcessedValue(self, "SightMidPoint", true)
         -- local midpoint = sightdelta * math.cos(sightdelta * halfPi)
@@ -508,8 +531,26 @@ function SWEP:GetViewModelPosition(pos, ang)
     -- local sprintdelta = self:Curve(self:GetSprintDelta())
     local sprintdelta = self:GetSprintDelta()
 
-    if sprintdelta > 0 then
-        -- local ts_sprintdelta = 0 -- self:GetTraversalSprintAmount()
+    if sprintdelta > 0 and self:GetNW2Bool("EFT_HighReadyStance", true) and self:GetValue("EFTWeight") < 4 then --тише тише потом все будет
+                -- local ts_sprintdelta = 0 -- self:GetTraversalSprintAmount()
+        sprintdelta = math_ease.InOutQuad(sprintdelta) - curvedcustomizedelta
+        -- ts_sprintdelta = math_ease.InOutSine(ts_sprintdelta)
+        -- sprintdelta = math.max(sprintdelta, ts_sprintdelta)
+        local sprpos = swepGetProcessedValue(self, "TacSprintPos", true) or swepGetProcessedValue(self, "RestPos", true)
+        local sprang = swepGetProcessedValue(self, "TacSprintAng", true) or swepGetProcessedValue(self, "RestAng", true)
+        -- sprpos = LerpVector(ts_sprintdelta, sprpos, swepGetProcessedValue(self, "TraversalSprintPos"))
+        -- sprang = LerpAngle(ts_sprintdelta, sprang, swepGetProcessedValue(self, "TraversalSprintAng"))
+        LerpVectorEdit(sprintdelta, offsetpos, sprpos)
+        LerpAngleEdit(sprintdelta, offsetang, sprang)
+        LerpAngleEdit(sprintdelta, extra_offsetang, angle_zero)
+        local sim = swepGetProcessedValue(self, "SprintMidPoint", true)
+        local spr_midpoint = sprintdelta * math.cos(sprintdelta * halfPi)
+        local spr_joffset = (sim and sim.Pos or vector_origin) * spr_midpoint
+        local spr_jaffset = (sim and sim.Ang or angle_zero) * spr_midpoint
+        extra_offsetpos:Add(spr_joffset)
+        extra_offsetang:Add(spr_jaffset)
+    elseif sprintdelta > 0 then
+                -- local ts_sprintdelta = 0 -- self:GetTraversalSprintAmount()
         sprintdelta = math_ease.InOutQuad(sprintdelta) - curvedcustomizedelta
         -- ts_sprintdelta = math_ease.InOutSine(ts_sprintdelta)
         -- sprintdelta = math.max(sprintdelta, ts_sprintdelta)
@@ -527,7 +568,6 @@ function SWEP:GetViewModelPosition(pos, ang)
         extra_offsetpos:Add(spr_joffset)
         extra_offsetang:Add(spr_jaffset)
     end
-
     local nearwalldelta = self:GetNearWallAmount()
 
     if nearwalldelta > 0 then

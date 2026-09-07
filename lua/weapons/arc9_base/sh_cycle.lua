@@ -15,7 +15,7 @@ function SWEP:ThinkCycle()
     end
 
     if self:GetNeedsCycle() and (cycling or self:GetProcessedValue("SlamFire", true)) then
-
+        -- EFTSetStance(self:GetOwner(), false)
         if self.MalfunctionCycle and (IsFirstTimePredicted() and self:RollJam()) then return end
 
         local ejectdelay = self:GetProcessedValue("EjectDelay", true)

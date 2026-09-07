@@ -91,7 +91,7 @@ for _, addon in pairs(engine.GetAddons()) do
 end
 
 local function HasCustomOffset(holdtype)
-    local animsetlocal = playeranimset
+    local animsetlocal = playeHasCustomOffsetranimset
     if ! PlayerReanimsOffsets[animsetlocal] or ! PlayerReanimsOffsets[animsetlocal][holdtype] then
         animsetlocal =
         "default"
@@ -1015,6 +1015,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
                 local nearwalldelta = self:GetNearWallAmount()
                 local bipodamount = self:GetBipodAmount()
                 local out = self:GetOutOfBreath()
+                local sprint = self:GetSprintAmount()
 
                 local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
                 local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
@@ -1034,29 +1035,39 @@ local function SetTPIKOffset(self, wm, owner, lp)
                 local cornerangle = wep.TPIKCornerAngle
                 local leftshoulderangle = wep.TPIKLeftShoulderAngle
 
+                local tacsprint_vector = wep.TPIKTacReadyVector
+                local tacsprint_angle = wep.TPIKTacReadyAngle
 
                 local eft_weight = self:GetValue("EFTWeight") or 0
                 local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
 
-                local target_low = (eft_inlowready and can_use_stance or eft_weight > 8 and can_use_stance or out and can_use_stance) and 1 or 0
+                local target_low = (eft_inlowready and can_use_stance or eft_weight > 7 and can_use_stance or out and can_use_stance) and 1 or 0
                 self.lerp_low = Lerp(FrameTime() * 0.8, self.lerp_low or 0, target_low)
-            
                 if self.lerp_low > 0.001 then
                     pos:Add(lowreadyvector * self.lerp_low)
                     ang:Add(lowreadyangle * self.lerp_low)
                 end
-                
+            
+
                 local target_high = (eft_inhighready and can_use_stance) and 1 or 0
                 self.lerp_high = Lerp(FrameTime() * 0.75, self.lerp_high or 0, target_high)
-                
-                if self.lerp_high > 0.001 then
+                if self.lerp_high > 0.001 and sprint == 0 then
                     pos:Add(highreadyvector * self.lerp_high)
                     ang:Add(highreadyangle * self.lerp_high)
+                elseif eft_inhighready and sprint > 0 and !wep.IsPistol and eft_weight < 4 then
+                    pos:Add(tacsprint_vector * sprint)
+                    ang:Add(tacsprint_angle * sprint)
                 end
+              
+                -- local target_tacsprint = sprint
+                -- self.lerp_tac = Lerp(FrameTime() * 0.75, lerp_tac or 0, sprint)
+                -- if eft_inhighready and self.lerp_tac > 0.001 then
+                --     pos:Add(tacsprint_vector * self.lerp_tac)
+                --     ang:Add(tacsprint_angle * self.lerp_tac)
+                -- end 
 
                 local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
                 self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
-            
                 if self.lerp_left > 0.001 then
                     pos:Add(leftshouldervector * self.lerp_left)
                     ang:Add(leftshoulderangle * self.lerp_left)
@@ -1064,7 +1075,6 @@ local function SetTPIKOffset(self, wm, owner, lp)
 
                 local target_corner = (eft_incorner and can_use_stance and !reloading and out == false) and 1 or 0
                 self.lerp_corner = Lerp(FrameTime() * 1.5, self.lerp_corner or 0, target_corner)
-            
                 if self.lerp_corner > 0.001 then
                     pos:Add(cornervector * self.lerp_corner)
                     ang:Add(cornerangle * self.lerp_corner)
@@ -1072,7 +1082,6 @@ local function SetTPIKOffset(self, wm, owner, lp)
 
                 local target_somalian = (eft_insomalian and can_use_stance and !reloading and out == false) and 1 or 0
                 self.lerp_somalian = Lerp(FrameTime() * 0.8, self.lerp_somalian or 0, target_somalian)
-            
                 if self.lerp_somalian > 0.001 then
                     pos:Add(somalianvector * self.lerp_somalian)
                     ang:Add(somalianangle * self.lerp_somalian)
@@ -1315,6 +1324,21 @@ function SWEP:DoTPIK(isdepth)
     if ply:IsTyping() then nolefthand = true end
     if ply:GetNW2Int("CurrentCustomGesture", 0) > 0 then nolefthand = true end -- custom thing
 
+    self:SetWeaponHoldType(htype) --тиш тиш это сикретс
+    if self:GetSprintDelta() > 0 and self:GetNW2Bool("EFT_HighReadyStance", true) then  --Tac Sprint
+        local wep = LocalPlayer():GetActiveWeapon()
+        if IsValid(wep) and !wep.IsPistol and (self:GetValue("EFTWeight") or 0) < 4 then
+            nolefthand = true
+            wep:SetWeaponHoldType("slam") --пу пу пу сервер тоже нада
+        end
+    elseif self:GetSprintDelta() == 0 and self:GetNW2Bool("EFT_HighReadyStance", false) then
+        if IsValid(wep) then
+            nolefthand = false
+            wep:SetWeaponHoldType("passive")
+        end
+    end
+
+    
     local tpikOverride = TPIKAPI_GetTemporaryOverride(self)
     local tpikNoRightHand = false
     if tpikOverride then

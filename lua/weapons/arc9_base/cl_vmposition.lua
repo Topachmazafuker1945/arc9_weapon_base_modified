@@ -26,8 +26,8 @@ local vmAddX = GetConVar("arc9_vm_addx")
 local vmAddY = GetConVar("arc9_vm_addy")
 local vmAddZ = GetConVar("arc9_vm_addz")
 local arc9DevBenchGun = GetConVar("arc9_dev_benchgun")
-local vmleaning = GetConVar("eft_vmleaning")
-local insight_vmleaning = GetConVar("eft_insight_vmleaning")
+local vmleaning = GetConVar("arc9_eft_vmleaning")
+local insight_vmleaning = GetConVar("arc9_eft_insight_vmleaning")
 local isSingleplayer = game.SinglePlayer()
 
 --[[local lowreadyvector = Vector(-2.0, -5, 1.0)
@@ -265,7 +265,7 @@ function SWEP:GetViewModelPosition(pos, ang)
         local can_stance = (nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0)
 
         -- local target_low = (eft_inlowready or can_stance or eft_weight > 8 and can_stance or out == true and can_stance) and 1 or 0
-        local target_low = ((eft_inlowready or eft_weight > 8 or out == true) and can_stance) and 1 or 0
+        local target_low = ((eft_inlowready or eft_weight > 7 or out == true) and can_stance) and 1 or 0
         --print(eft_inlowready)
         self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
         if self.lerp_low_vm > 0.001 then
@@ -277,7 +277,7 @@ function SWEP:GetViewModelPosition(pos, ang)
             --LerpAngleEdit(1, offsetang, sprang)
         end
 
-        local target_high = (eft_inhighready and can_stance and eft_weight < 8 and out == false) and 1 or 0
+        local target_high = (eft_inhighready and can_stance and eft_weight < 7 and out == false) and 1 or 0
         self.lerp_high_vm = Lerp(FrameTime() * 10, self.lerp_high_vm or 0, target_high)
         if self.lerp_high_vm > 0.001 then
             --local sprpos = cornervector
@@ -376,17 +376,19 @@ function SWEP:GetViewModelPosition(pos, ang)
     --         offsetang = LerpAngle(curvedblindfirecornerdelta, offsetang, self:GetValue("BlindFireLeftAng"))
     --     end
     -- end
-    local lean_vector = Vector(1, 0, 1)
-    local lean_angle = Angle(0, 0, 15)
-    local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
-    local fraction = owner:GetNW2Float("leaning_fraction", 0)
-    
-    self.lerp_lean = Lerp(FrameTime() * 0.5, target_fraction or 0, fraction)
-    --print(self.lerp_lean)
-    
-    if math.abs(self.lerp_lean) > 0.001 then
-        offsetpos:Add(lean_vector * self.lerp_lean)
-        offsetang:Add(lean_angle * self.lerp_lean)
+    if vmleaning:GetBool() then
+        local lean_vector = Vector(1, 0, 1)
+        local lean_angle = Angle(0, 0, 15)
+        local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
+        local fraction = owner:GetNW2Float("leaning_fraction", 0)
+        
+        self.lerp_lean = Lerp(FrameTime() * 0.5, target_fraction or 0, fraction)
+        --print(self.lerp_lean)
+        
+        if math.abs(self.lerp_lean) > 0.001 then
+            offsetpos:Add(lean_vector * self.lerp_lean)
+            offsetang:Add(lean_angle * self.lerp_lean)
+        end
     end
     
     if reloading then
@@ -470,23 +472,25 @@ function SWEP:GetViewModelPosition(pos, ang)
             offsetang = LerpAngleFunny(sightdelta, offsetang or angle_zero, sightang or angle_zero, insifgts)
         end
 
-        --a little bit crookedly and silly thing need to do something with sight code i guess
-        local lean_vector_negative = Vector(-0.1, 0, -1.1) --left
-        local lean_vector = Vector(0.35, 0, 1.05) --right
-        local lean_angle_negative = Angle(0, 0, 15)
-        local lean_angle = Angle(0, 0, 15)
-
-        self.lerp_leansight_start = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
-        -- self.lerp_leansight_end = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
-        
-        if self.lerp_leansight_start > 0 then
-            offsetpos:Add(lean_vector * math.abs(self.lerp_leansight_start))
-            offsetang:Add(lean_angle * self.lerp_leansight_start)
-        else
-            offsetpos:Add(lean_vector_negative * math.abs(self.lerp_leansight_start))
-            offsetang:Add(lean_angle_negative * self.lerp_leansight_start)
-        end        
-                     
+        if insight_vmleaning:GetBool() then
+            --a little bit crookedly and silly thing need to do something with sight code i guess
+            local lean_vector_negative = Vector(-0.1, 0, -1.1) --left
+            local lean_vector = Vector(0.35, 0, 1.05) --right
+            local lean_angle_negative = Angle(0, 0, 15)
+            local lean_angle = Angle(0, 0, 15)
+            local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
+            local fraction = owner:GetNW2Float("leaning_fraction", 0)
+            self.lerp_leansight_start = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
+            -- self.lerp_leansight_end = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
+            
+            if self.lerp_leansight_start > 0 then
+                offsetpos:Add(lean_vector * math.abs(self.lerp_leansight_start))
+                offsetang:Add(lean_angle * self.lerp_leansight_start)
+            else
+                offsetpos:Add(lean_vector_negative * math.abs(self.lerp_leansight_start))
+                offsetang:Add(lean_angle_negative * self.lerp_leansight_start)
+            end        
+        end       
         -- local eepos, eeang = Vector(0, 0, 0), Angle(0, 0, 0)
         -- local im = swepGetProcessedValue(self, "SightMidPoint", true)
         -- local midpoint = sightdelta * math.cos(sightdelta * halfPi)
@@ -531,7 +535,7 @@ function SWEP:GetViewModelPosition(pos, ang)
     -- local sprintdelta = self:Curve(self:GetSprintDelta())
     local sprintdelta = self:GetSprintDelta()
 
-    if sprintdelta > 0 and self:GetNW2Bool("EFT_HighReadyStance", true) and self:GetValue("EFTWeight") < 4 then --тише тише потом все будет
+    if sprintdelta > 0 and CanStances and self:GetNW2Bool("EFT_HighReadyStance", true) and self:GetValue("EFTWeight") < 4 then --тише тише потом все будет
                 -- local ts_sprintdelta = 0 -- self:GetTraversalSprintAmount()
         sprintdelta = math_ease.InOutQuad(sprintdelta) - curvedcustomizedelta
         -- ts_sprintdelta = math_ease.InOutSine(ts_sprintdelta)

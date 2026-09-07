@@ -557,8 +557,12 @@ do
                 stat = arcGetValue(self, val, stat, "Crouch")
             end
 
-            if ownerOnGround and playerSprinting(owner) and !self:StillWaiting() then
+            if ownerOnGround and playerSprinting(owner) and !self:StillWaiting() and !self:GetNW2Bool("EFT_HighReadyStance", true) then
                 stat = arcGetValue(self, val, stat, "Sprint")
+            end
+
+            if ownerOnGround and playerSprinting(owner) and !self:StillWaiting() and self:GetNW2Bool("EFT_HighReadyStance", true) then
+                stat = arcGetValue(self, val, stat, "Tacsprint")
             end
         end
 

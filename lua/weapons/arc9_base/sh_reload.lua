@@ -35,7 +35,7 @@ function SWEP:Reload()
         self:UnJam()
         return
     end
-
+    
     if self:GetOwner():KeyDown(IN_WALK) then
         return
     end
@@ -162,7 +162,7 @@ function SWEP:Reload()
     self:SetRecoilAmount(0)
     self:SetNeedTriggerPress(false) -- Allows you to keep spraying with Auto-Reload
     self:SetBurstCount(0)
-
+    EFTSetStance(self:GetOwner(), false)
     -- self:SetTimer(t * 0.9, function()
     --     if !IsValid(self) then return end
 
@@ -171,7 +171,7 @@ function SWEP:Reload()
     -- end)
 
     self:SetReloadFinishTime(CurTime() + (t * 0.95))
-
+    
     self:RunHook("Hook_PostReload")
 end
 

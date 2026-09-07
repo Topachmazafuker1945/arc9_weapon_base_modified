@@ -124,7 +124,8 @@ function SWEP:ToggleSafety(onoff)
     local last = self:GetSafe()
     --print(last)
     self:SetSafe(onoff)
-    
+    -- EFTSetReady(self:GetOwner(), !onoff)
+
     if onoff != last then
         if IsFirstTimePredicted() then
             local soundtab1 = {

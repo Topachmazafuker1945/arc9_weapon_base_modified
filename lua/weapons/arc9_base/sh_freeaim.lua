@@ -55,10 +55,13 @@ function SWEP:GetFreeSwayAngles()
     local swayamt = self:GetFreeSwayAmount()
     if swayamt == 0 then return end
 -- self:GetSwaySpeedAmount()
-    local swayspeed = self:GetSwaySpeedAmount()
+    local swayspeed = self:GetSwaySpeedAmount() or 1
     local isScope = self:IsUsingRTScope()
 
-    swayamt = isScope and 0 or swayamt * (1-self:GetSightAmount() * 0.2)
+    if !GetConVar("arc9_eft_vm_sway_rtscope"):GetBool() then
+        swayamt = isScope and 0 or swayamt * (1-self:GetSightAmount() * 0.2)
+    end
+
     smoothswayamt = CLIENT and Lerp(RealFrameTime() * 2, smoothswayamt, swayamt) or swayamt
     if self:GetOutOfBreath() then swayspeed = swayspeed + 2 end
     
@@ -82,7 +85,7 @@ SWEP.InertiaSideMoveSmooth = 0
 function SWEP:GetInertiaSwayAngles()
     if !self.InertiaEnabled then return end
     -- if !arc9_mod_inertia:GetBool() then return end
-
+    
     local eyee = self:GetOwner():EyeAngles()
 
     self.InertiaDiff = LerpAngle(FrameTime() * 8, self.InertiaDiff, eyee - self:GetLastAimAngle())

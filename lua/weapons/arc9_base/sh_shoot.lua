@@ -273,6 +273,12 @@ function SWEP:PrimaryAttack()
         self:SetNeedTriggerPress(true)
         return
     end
+    
+    if GetConVar("arc9_eft_shoot_exit_ready"):GetBool() then
+        if self:GetNW2Bool("EFT_LowReadyStance", true) or self:GetNW2Bool("EFT_HighReadyStance", true) then
+            EFTSetReady(self:GetOwner(), status)
+        end
+    end
 
     if self:GetNeedTriggerPress() then return end
 
@@ -1082,66 +1088,68 @@ function SWEP:GetShootPos()
 
     pos, ang = self:GetRecoilOffset(pos, ang)
 
-    local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) or {}
-    local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) or {}
-    local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) or {}
-    local sight = self:GetSightDelta()
-    local bipodamount = self:GetBipodAmount()
+    if self.EFTWeapon then
+        local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false) or {}
+        local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false) or {}
+        local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) or {}
+        local sight = self:GetSightDelta()
+        local bipodamount = self:GetBipodAmount()
 
-    if sight > 0 or bipodamount == 1 then
-        angRight:Mul(shootposoffset_aim[1])
-        angForward:Mul(shootposoffset_aim[2])
-        angUp:Mul(shootposoffset_aim[3])
+        if sight > 0 or bipodamount == 1 then
+            angRight:Mul(shootposoffset_aim[1])
+            angForward:Mul(shootposoffset_aim[2])
+            angUp:Mul(shootposoffset_aim[3])
 
-        pos:Add(angRight)
-        pos:Add(angForward)
-        pos:Add(angUp)
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
 
-        return pos, ang
-    end
+            return pos, ang
+        end
 
-    if eft_inleftshoulder == true then
-        angRight:Mul(shootposoffset_leftshoulder[1])
-        angForward:Mul(shootposoffset_leftshoulder[2])
-        angUp:Mul(shootposoffset_leftshoulder[3])
+        if eft_inleftshoulder == true then
+            angRight:Mul(shootposoffset_leftshoulder[1])
+            angForward:Mul(shootposoffset_leftshoulder[2])
+            angUp:Mul(shootposoffset_leftshoulder[3])
 
-        pos:Add(angRight)
-        pos:Add(angForward)
-        pos:Add(angUp)
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
 
-        return pos, ang
-    else
-        angRight:Mul(shootposoffset[1])
-        angForward:Mul(shootposoffset[2])
-        angUp:Mul(shootposoffset[3])
+            return pos, ang
+        else
+            angRight:Mul(shootposoffset[1])
+            angForward:Mul(shootposoffset[2])
+            angUp:Mul(shootposoffset[3])
 
-        pos:Add(angRight)
-        pos:Add(angForward)
-        pos:Add(angUp)
-    end
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
+        end
 
-    if eft_incorner == true then
-        angRight:Mul(shootposoffset_corner[1])
-        angForward:Mul(shootposoffset_corner[2])
-        angUp:Mul(shootposoffset_corner[3])
+        if eft_incorner == true then
+            angRight:Mul(shootposoffset_corner[1])
+            angForward:Mul(shootposoffset_corner[2])
+            angUp:Mul(shootposoffset_corner[3])
 
-        pos:Add(angRight)
-        pos:Add(angForward)
-        pos:Add(angUp)
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
 
-        return pos, ang
-    end
+            return pos, ang
+        end
 
-    if eft_insomalian == true then
-        angRight:Mul(shootposoffset_somalian[1])
-        angForward:Mul(shootposoffset_somalian[2])
-        angUp:Mul(shootposoffset_somalian[3])
+        if eft_insomalian == true then
+            angRight:Mul(shootposoffset_somalian[1])
+            angForward:Mul(shootposoffset_somalian[2])
+            angUp:Mul(shootposoffset_somalian[3])
 
-        pos:Add(angRight)
-        pos:Add(angForward)
-        pos:Add(angUp)
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
 
-        return pos, ang
+            return pos, ang
+        end
     end
     return pos, ang
     

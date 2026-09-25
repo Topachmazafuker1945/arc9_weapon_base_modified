@@ -994,7 +994,7 @@ local function SetTPIKOffset(self, wm, owner, lp)
             ang:Add(self.PeekAng * sightdelta * self.PeekingSmooth)
         end
 
-        if self.EFTErgo then -- only eft cuz this is not ideal
+        if self.EFTWeapon then -- only eft cuz this is not ideal
             -- visual recoil, cuz we don't add vm pos anymore
             local vrp, vra = self:GetVisualRecoilPos(), self:GetVisualRecoilAng() * 2.5
             self.TPIKSmoothRecoilPos = LerpVector(FrameTime() * 1, self.TPIKSmoothRecoilPos or vrp,
@@ -1005,41 +1005,39 @@ local function SetTPIKOffset(self, wm, owner, lp)
         end
     end
 
-    local ply = LocalPlayer() -- KRUTIE STANCES EPTA 
+    local ply = self:GetOwner() -- KRUTIE STANCES EPTA 
     local wep = ply:GetActiveWeapon()
     if IsValid(ply) then
-        if wep.EFTCombatStances then
+        if wep.EFTCombatStances then --arc9 eft base
+
+            local lowreadyvector = wep.TPIKLowReadyVector --not for MP, if u dont got a weps it uses default arc9_eft_base vectors and angles
+            local highreadyvector = wep.TPIKHighReadyVector
+            local somalianvector = wep.TPIKSomalianVector
+            local cornervector = wep.TPIKCornerVector
+            local leftshouldervector = wep.TPIKLeftShoulderVector
+
+            local lowreadyangle = wep.TPIKLowReadyAngle
+            local highreadyangle = wep.TPIKHighReadyAngle
+            local somalianangle = wep.TPIKSomalianAngle
+            local cornerangle = wep.TPIKCornerAngle
+            local leftshoulderangle = wep.TPIKLeftShoulderAngle
+
+            local tacsprint_vector = wep.TPIKTacReadyVector
+            local tacsprint_angle = wep.TPIKTacReadyAngle
+
+            local reloading = self:GetReloading()
+            local out = self:GetOutOfBreath()
+            local sprint = self:GetSprintAmount()
+
+            local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
+            local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
+            local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
+            local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
+            local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
+            local eft_weight = self:GetValue("EFTWeight") or 0
+
             do  
-                local sightamount = self:GetSightAmount()
-                local reloading = self:GetReloading()
-                local nearwalldelta = self:GetNearWallAmount()
-                local bipodamount = self:GetBipodAmount()
-                local out = self:GetOutOfBreath()
-                local sprint = self:GetSprintAmount()
-
-                local eft_inleftshoulder = self:GetNW2Bool("EFT_InLeftShoulder", false)
-                local eft_incorner = self:GetNW2Bool("EFT_InCornerFire", false)
-                local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
-                local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
-                local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
-
-                local lowreadyvector = wep.TPIKLowReadyVector --parasha nado buden peredelat too fucking much stuff
-                local highreadyvector = wep.TPIKHighReadyVector
-                local somalianvector = wep.TPIKSomalianVector
-                local cornervector = wep.TPIKCornerVector
-                local leftshouldervector = wep.TPIKLeftShoulderVector
-
-                local lowreadyangle = wep.TPIKLowReadyAngle
-                local highreadyangle = wep.TPIKHighReadyAngle
-                local somalianangle = wep.TPIKSomalianAngle
-                local cornerangle = wep.TPIKCornerAngle
-                local leftshoulderangle = wep.TPIKLeftShoulderAngle
-
-                local tacsprint_vector = wep.TPIKTacReadyVector
-                local tacsprint_angle = wep.TPIKTacReadyAngle
-
-                local eft_weight = self:GetValue("EFTWeight") or 0
-                local can_use_stance = (ht != "passive" and ht != "normal" and sightamount < 0.25 and nearwalldelta == 0 and bipodamount == 0 )
+                local can_use_stance = (ht != "passive" and ht != "normal" and self:GetSightAmount() < 0.25 and self:GetNearWallAmount() == 0 and self:GetBipodAmount() == 0 )
 
                 local target_low = (eft_inlowready and can_use_stance or eft_weight > 7 and can_use_stance or out and can_use_stance) and 1 or 0
                 self.lerp_low = Lerp(FrameTime() * 0.8, self.lerp_low or 0, target_low)
@@ -1051,21 +1049,16 @@ local function SetTPIKOffset(self, wm, owner, lp)
 
                 local target_high = (eft_inhighready and can_use_stance) and 1 or 0
                 self.lerp_high = Lerp(FrameTime() * 0.75, self.lerp_high or 0, target_high)
-                if self.lerp_high > 0.001 and sprint == 0 then
-                    pos:Add(highreadyvector * self.lerp_high)
-                    ang:Add(highreadyangle * self.lerp_high)
-                elseif eft_inhighready and sprint > 0 and !wep.IsPistol and eft_weight < 4 then
+                if eft_inhighready and sprint > 0 and !wep.IsPistol and eft_weight < 4 then --tac sprint
                     pos:Add(tacsprint_vector * sprint)
                     ang:Add(tacsprint_angle * sprint)
+
+                elseif self.lerp_high > 0.001 then
+                    pos:Add(highreadyvector * self.lerp_high)
+                    ang:Add(highreadyangle * self.lerp_high)
+
                 end
               
-                -- local target_tacsprint = sprint
-                -- self.lerp_tac = Lerp(FrameTime() * 0.75, lerp_tac or 0, sprint)
-                -- if eft_inhighready and self.lerp_tac > 0.001 then
-                --     pos:Add(tacsprint_vector * self.lerp_tac)
-                --     ang:Add(tacsprint_angle * self.lerp_tac)
-                -- end 
-
                 local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
                 self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
                 if self.lerp_left > 0.001 then
@@ -1089,7 +1082,6 @@ local function SetTPIKOffset(self, wm, owner, lp)
             end
         end
     end
-
     wm.slottbl.Pos = pos
     wm.slottbl.Ang = ang
 end
@@ -1324,21 +1316,27 @@ function SWEP:DoTPIK(isdepth)
     if ply:IsTyping() then nolefthand = true end
     if ply:GetNW2Int("CurrentCustomGesture", 0) > 0 then nolefthand = true end -- custom thing
 
-    self:SetWeaponHoldType(htype) --тиш тиш это сикретс
-    if self:GetSprintDelta() > 0 and self:GetNW2Bool("EFT_HighReadyStance", true) then  --Tac Sprint
-        local wep = LocalPlayer():GetActiveWeapon()
-        if IsValid(wep) and !wep.IsPistol and (self:GetValue("EFTWeight") or 0) < 4 then
-            nolefthand = true
-            wep:SetWeaponHoldType("slam") --пу пу пу сервер тоже нада
+    if self.EFTWeapon then --Is EFT Weapon
+        -- if (self:GetValue("EFTWeight") or 0) > 7 or self:GetOutOfBreath() then return end
+
+        self:SetWeaponHoldType(htype) --тиш тиш это сикретс
+
+        if self:GetSprintDelta() > 0 and self:GetNW2Bool("EFT_HighReadyStance", true) then  --Tac Sprint
+            local wep = self:GetOwner():GetActiveWeapon()
+            -- local wep = ply:GetActiveWeapon()
+            if IsValid(wep) and !wep.IsPistol and (self:GetValue("EFTWeight") or 0) < 4 then
+                nolefthand = true
+                wep:SetWeaponHoldType("slam") --пу пу пу сервер тоже нада
+            end
+        elseif self:GetSprintDelta() == 0 and self:GetNW2Bool("EFT_HighReadyStance", false) then
+            if IsValid(wep) then
+                nolefthand = false
+                wep:SetWeaponHoldType("htype")
+            end
         end
-    elseif self:GetSprintDelta() == 0 and self:GetNW2Bool("EFT_HighReadyStance", false) then
-        if IsValid(wep) then
-            nolefthand = false
-            wep:SetWeaponHoldType("passive")
-        end
+
     end
 
-    
     local tpikOverride = TPIKAPI_GetTemporaryOverride(self)
     local tpikNoRightHand = false
     if tpikOverride then

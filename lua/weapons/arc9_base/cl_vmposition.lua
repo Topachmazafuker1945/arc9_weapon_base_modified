@@ -30,6 +30,8 @@ local vmleaning = GetConVar("arc9_eft_vmleaning")
 local insight_vmleaning = GetConVar("arc9_eft_insight_vmleaning")
 local isSingleplayer = game.SinglePlayer()
 
+
+
 --[[local lowreadyvector = Vector(-2.0, -5, 1.0)
 local highreadyvector = Vector(-0, -0, 0)
 local somalianvector = Vector(-2.0, -5, 5.0)
@@ -238,6 +240,7 @@ function SWEP:GetViewModelPosition(pos, ang)
     --     offsetpos:Set(swepGetProcessedValue(self, "MovingPos"))
     --     offsetang:Set(swepGetProcessedValue(self, "MovingAng"))
     -- end
+
     if CanStances then
         local lowreadyvector = swepGetProcessedValue(self, "LowReadyVector", true)
         local highreadyvector = swepGetProcessedValue(self, "HighReadyVector", true)
@@ -264,63 +267,52 @@ function SWEP:GetViewModelPosition(pos, ang)
         local out = self:GetOutOfBreath()
         local can_stance = (nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0)
 
-        -- local target_low = (eft_inlowready or can_stance or eft_weight > 8 and can_stance or out == true and can_stance) and 1 or 0
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         local target_low = ((eft_inlowready or eft_weight > 7 or out == true) and can_stance) and 1 or 0
-        --print(eft_inlowready)
         self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
         if self.lerp_low_vm > 0.001 then
-            --local sprpos = lowreadyvector
-            --local sprang = lowreadyangle
             extra_offsetpos:Add(lowreadyvector * self.lerp_low_vm)
             extra_offsetang:Add(lowreadyangle * self.lerp_low_vm)
-            --LerpVectorEdit(1, offsetpos, sprpos)
-            --LerpAngleEdit(1, offsetang, sprang)
         end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         local target_high = (eft_inhighready and can_stance and eft_weight < 7 and out == false) and 1 or 0
         self.lerp_high_vm = Lerp(FrameTime() * 10, self.lerp_high_vm or 0, target_high)
         if self.lerp_high_vm > 0.001 then
-            --local sprpos = cornervector
-            --local sprang = cornerangle
             extra_offsetpos:Add(highreadyvector * self.lerp_high_vm)
             extra_offsetang:Add(highreadyangle * self.lerp_high_vm)
-            --LerpVectorEdit(1, offsetpos, sprpos)
-            --LerpAngleEdit(1, offsetang, sprang)
         end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         local target_corner = (eft_incorner and !reloading and can_stance and out == false) and 1 or 0
         self.lerp_corner_vm = Lerp(FrameTime() * 10, self.lerp_corner_vm or 0, target_corner)
         if self.lerp_corner_vm > 0.001 then
-            --local sprpos = cornervector
-            --local sprang = cornerangle
             extra_offsetpos:Add(cornervector * self.lerp_corner_vm)
             extra_offsetang:Add(cornerangle * self.lerp_corner_vm)
-            --LerpVectorEdit(1, offsetpos, sprpos)
-            --LerpAngleEdit(1, offsetang, sprang)
         end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         local target_left = (eft_inleftshoulder and !reloading and can_stance and out == false) and 1 or 0
         self.lerp_left_vm = Lerp(FrameTime() * 2.5, self.lerp_left_vm or 0, target_left)
         if self.lerp_left_vm > 0.001 then
-            --local sprpos = leftshouldervector
-            --local sprang = leftshoulderangle
             extra_offsetpos:Add(leftshouldervector * self.lerp_left_vm)
             extra_offsetang:Add(leftshoulderangle * self.lerp_left_vm)
-            --LerpVectorEdit(1, offsetpos, sprpos)
-            --LerpAngleEdit(1, offsetang, sprang)
         end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         local target_somalian = (eft_insomalian and !reloading and can_stance and out == false) and 1 or 0
         self.lerp_somalian_vm = Lerp(FrameTime() * 4, self.lerp_somalian_vm or 0, target_somalian)
         if self.lerp_somalian_vm > 0.001 then
-            -- local sprpos = somalianvector
-            -- local sprang = somalianangle
             extra_offsetpos:Add(somalianvector * self.lerp_somalian_vm)
             extra_offsetang:Add(somalianangle * self.lerp_somalian_vm)
-            -- LerpVectorEdit(1, offsetpos, sprpos)
-            -- LerpAngleEdit(1, offsetang, sprang)
         end
     end
+
     local getbipod = self:GetBipod()
 
     if getbipod then
@@ -379,7 +371,7 @@ function SWEP:GetViewModelPosition(pos, ang)
     if vmleaning:GetBool() then
         local lean_vector = Vector(1, 0, 1)
         local lean_angle = Angle(0, 0, 15)
-        local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
+        local target_fraction = owner:GetNW2Float("leaning_fraction", 0) --чеее
         local fraction = owner:GetNW2Float("leaning_fraction", 0)
         
         self.lerp_lean = Lerp(FrameTime() * 0.5, target_fraction or 0, fraction)
@@ -481,12 +473,11 @@ function SWEP:GetViewModelPosition(pos, ang)
             local target_fraction = owner:GetNW2Float("leaning_fraction", 0)
             local fraction = owner:GetNW2Float("leaning_fraction", 0)
             self.lerp_leansight_start = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
-            -- self.lerp_leansight_end = Lerp(FrameTime() * 1, target_fraction or 0, fraction)
             
             if self.lerp_leansight_start > 0 then
                 offsetpos:Add(lean_vector * math.abs(self.lerp_leansight_start))
                 offsetang:Add(lean_angle * self.lerp_leansight_start)
-            else
+            elseif self.lerp_leansight_start < 0 then 
                 offsetpos:Add(lean_vector_negative * math.abs(self.lerp_leansight_start))
                 offsetang:Add(lean_angle_negative * self.lerp_leansight_start)
             end        

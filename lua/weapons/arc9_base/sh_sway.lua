@@ -6,9 +6,11 @@ local togglconvar = GetConVar("arc9_togglebreath")
 local ppconvar = GetConVar("arc9_breath_pp")
 local hudconvar = GetConVar("arc9_breath_hud")
 local swayconvar = GetConVar("arc9_mod_sway")
+local breath = GetConVar("arc9_eft_enable_breathing")
 
 function SWEP:ThinkHoldBreath()
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
+    if self.EFTWeapon and !breath:GetBool() then return end
     if !self:GetOwner():IsPlayer() then return end
     local weight = self:GetValue("EFTWeight") or 0
     local holdbreathtime = self:GetValue("HoldBreathTime")
@@ -122,6 +124,7 @@ function SWEP:ThinkHoldBreath()
     end -- holy shit coding
 
     if game.SinglePlayer() and SERVER and !slomoconvar:GetBool() then
+        if self.EFTWeapon then return end
         local ts = game.GetTimeScale()
 
         ts = math.Approach(ts, target_ts, FrameTime() / ts / 0.5)
@@ -184,6 +187,7 @@ local pp_amount = 0
 
 function SWEP:HoldBreathPP()
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
+    if self.EFTWeapon then return end
     if self:GetValue("HoldBreathTime") <= 0 then return end
     if !ppconvar:GetBool() then return end
     local amt_d = math.min(1, (100 - self:GetBreath()) / 100)

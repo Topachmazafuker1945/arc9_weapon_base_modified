@@ -31,8 +31,11 @@ local TPIKHelperBonePatchRuntimeDisabled = false
 local activeposvector = Vector(-1, -1, 1)
 local peekvector = Vector(0, 2, 4)
 local someangforsights = Angle(3, -3, -8)
-local nearwallpos = Vector(5, -16, 0.5)
-local nearwallang = Angle(10, -80, -10)
+local nearwall2pos = Vector(5, -16, 0.5)
+local nearwall2ang = Angle(10, -80, -10)
+
+local nearwallpos = Vector(-15, -0, 10)
+local nearwallang = Angle(-10, -0, -0)
 
 -- local lowreadyvector = Vector(-0.0, -0, -3.0)
 -- local highreadyvector = Vector(-5, 0, 10)
@@ -957,7 +960,13 @@ local function SetTPIKOffset(self, wm, owner, lp)
         --local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false)
 
         --if nearwalldelta > 0 and ht != "passive" and ht != "normal" and eft_incorner == false and eft_insomalian == false then
-        if nearwalldelta > 0 and ht != "passive" and ht != "normal" then
+        if nearwalldelta == 1 and ht != "passive" and ht != "normal" then
+            nearwalldelta = math.ease.InOutQuad(nearwalldelta) - self.CustomizeDelta
+            pos:Add(nearwall2pos * nearwalldelta)
+            ang:Add(nearwall2ang * nearwalldelta)
+        end
+
+        if nearwalldelta < 1 and ht != "passive" and ht != "normal" then
             nearwalldelta = math.ease.InOutQuad(nearwalldelta) - self.CustomizeDelta
             pos:Add(nearwallpos * nearwalldelta)
             ang:Add(nearwallang * nearwalldelta)
@@ -1035,11 +1044,13 @@ local function SetTPIKOffset(self, wm, owner, lp)
             local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
             local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
             local eft_weight = self:GetValue("EFTWeight") or 0
+            local eft_overweight = GetEFTOverWeight(self:GetOwner())
+            local eft_out = GetEFTOutOfBreath(self:GetOwner())
 
             do  
                 local can_use_stance = (ht != "passive" and ht != "normal" and self:GetSightAmount() < 0.25 and self:GetNearWallAmount() == 0 and self:GetBipodAmount() == 0 )
 
-                local target_low = (eft_inlowready and can_use_stance or eft_weight > 7 and can_use_stance or out and can_use_stance) and 1 or 0
+                local target_low = (eft_inlowready and can_use_stance or eft_overweight > 7 and can_use_stance or eft_out and can_use_stance) and 1 or 0
                 self.lerp_low = Lerp(FrameTime() * 0.8, self.lerp_low or 0, target_low)
                 if self.lerp_low > 0.001 then
                     pos:Add(lowreadyvector * self.lerp_low)
@@ -1059,21 +1070,21 @@ local function SetTPIKOffset(self, wm, owner, lp)
 
                 end
               
-                local target_left = (eft_inleftshoulder and can_use_stance and !reloading and out == false) and 1 or 0
+                local target_left = (eft_inleftshoulder and can_use_stance and !reloading) and 1 or 0
                 self.lerp_left = Lerp(FrameTime() * 0.6, self.lerp_left or 0, target_left)
                 if self.lerp_left > 0.001 then
                     pos:Add(leftshouldervector * self.lerp_left)
                     ang:Add(leftshoulderangle * self.lerp_left)
                 end
 
-                local target_corner = (eft_incorner and can_use_stance and !reloading and out == false) and 1 or 0
+                local target_corner = (eft_incorner and can_use_stance and !reloading) and 1 or 0
                 self.lerp_corner = Lerp(FrameTime() * 1.5, self.lerp_corner or 0, target_corner)
                 if self.lerp_corner > 0.001 then
                     pos:Add(cornervector * self.lerp_corner)
                     ang:Add(cornerangle * self.lerp_corner)
                 end
 
-                local target_somalian = (eft_insomalian and can_use_stance and !reloading and out == false) and 1 or 0
+                local target_somalian = (eft_insomalian and can_use_stance and !reloading) and 1 or 0
                 self.lerp_somalian = Lerp(FrameTime() * 0.8, self.lerp_somalian or 0, target_somalian)
                 if self.lerp_somalian > 0.001 then
                     pos:Add(somalianvector * self.lerp_somalian)

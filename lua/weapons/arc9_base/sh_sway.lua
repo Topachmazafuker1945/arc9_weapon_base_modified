@@ -143,8 +143,9 @@ SWEP.IsHoldingBreath = false
 function SWEP:HoldingBreath()
     if !swayconvar:GetBool() and !slomoconvar:GetBool() then return end
     if self.EFTWeapon then
+        local overweigh = GetEFTOverWeight(self:GetOwner())
         local weight = self:GetValue("EFTWeight") or 0
-        if self.EFTCombatStances == false or (weight > 7 or self:GetOutOfBreath()) and self:GetSightAmount() < 0.8 or self:GetBipod() then return end
+        if self.EFTCombatStances == false or (overweigh > 7 or self:GetOutOfBreath()) and self:GetSightAmount() < 0.8 or self:GetBipod() then return end
         local IsHoldingWhile = ((self:GetNW2Bool("EFT_LowReadyStance", false) or self:GetNW2Bool("EFT_HighReadyStance", false) or self:GetSafe()) and self:GetSightAmount() < 0.8)
         -- local ownerkeydownspeed = self:GetOwner():KeyDown(IN_SPEED)
 

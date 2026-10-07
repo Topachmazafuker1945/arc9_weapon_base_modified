@@ -260,16 +260,18 @@ function SWEP:GetViewModelPosition(pos, ang)
         local eft_inlowready = self:GetNW2Bool("EFT_LowReadyStance", false)
         local eft_inhighready = self:GetNW2Bool("EFT_HighReadyStance", false)
 
+        local eft_overweight = GetEFTOverWeight(self:GetOwner())
+        local eft_out = GetEFTOutOfBreath(self:GetOwner())
         local eft_weight = self:GetValue("EFTWeight")
         local nearwalldelta = self:GetNearWallAmount()
         local bipodamount = self:GetBipodAmount()
         local sprintdelta = self:GetSprintDelta()
         local out = self:GetOutOfBreath()
-        local can_stance = (nearwalldelta == 0 and bipodamount == 0 and sprintdelta == 0)
+        local can_stance = (bipodamount == 0 and sprintdelta == 0)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        local target_low = ((eft_inlowready or eft_weight > 7 or out == true) and can_stance) and 1 or 0
+        local target_low = ((eft_inlowready or eft_overweight > 7 or eft_out == true) and can_stance) and 1 or 0
         self.lerp_low_vm = Lerp(FrameTime() * 10, self.lerp_low_vm or 0, target_low)
         if self.lerp_low_vm > 0.001 then
             extra_offsetpos:Add(lowreadyvector * self.lerp_low_vm)
@@ -278,7 +280,7 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        local target_high = (eft_inhighready and can_stance and eft_weight < 7 and out == false) and 1 or 0
+        local target_high = (eft_inhighready and can_stance and eft_overweight < 7) and 1 or 0
         self.lerp_high_vm = Lerp(FrameTime() * 10, self.lerp_high_vm or 0, target_high)
         if self.lerp_high_vm > 0.001 then
             extra_offsetpos:Add(highreadyvector * self.lerp_high_vm)
@@ -287,7 +289,7 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        local target_corner = (eft_incorner and !reloading and can_stance and out == false) and 1 or 0
+        local target_corner = (eft_incorner and !reloading and can_stance and nearwalldelta == 0) and 1 or 0
         self.lerp_corner_vm = Lerp(FrameTime() * 10, self.lerp_corner_vm or 0, target_corner)
         if self.lerp_corner_vm > 0.001 then
             extra_offsetpos:Add(cornervector * self.lerp_corner_vm)
@@ -296,7 +298,7 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        local target_left = (eft_inleftshoulder and !reloading and can_stance and out == false) and 1 or 0
+        local target_left = (eft_inleftshoulder and !reloading and can_stance and nearwalldelta == 0) and 1 or 0
         self.lerp_left_vm = Lerp(FrameTime() * 2.5, self.lerp_left_vm or 0, target_left)
         if self.lerp_left_vm > 0.001 then
             extra_offsetpos:Add(leftshouldervector * self.lerp_left_vm)
@@ -305,7 +307,7 @@ function SWEP:GetViewModelPosition(pos, ang)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        local target_somalian = (eft_insomalian and !reloading and can_stance and out == false) and 1 or 0
+        local target_somalian = (eft_insomalian and !reloading and can_stance and nearwalldelta == 0) and 1 or 0
         self.lerp_somalian_vm = Lerp(FrameTime() * 4, self.lerp_somalian_vm or 0, target_somalian)
         if self.lerp_somalian_vm > 0.001 then
             extra_offsetpos:Add(somalianvector * self.lerp_somalian_vm)
@@ -563,9 +565,24 @@ function SWEP:GetViewModelPosition(pos, ang)
         extra_offsetpos:Add(spr_joffset)
         extra_offsetang:Add(spr_jaffset)
     end
+
+
     local nearwalldelta = self:GetNearWallAmount()
 
-    if nearwalldelta > 0 then
+    if nearwalldelta == 1 then
+        -- local nearwall2 = self:GetNearWallAmount()
+        local nwpos = swepGetProcessedValue(self, "NearWall2Pos", true)
+        local nwang = swepGetProcessedValue(self, "NearWall2Ang", true)
+
+        local target_nearwall = (nearwalldelta) and 1 or 0
+        self.lerp_nearwall_2 = Lerp(FrameTime() * 1, self.lerp_nearwall_2 or 0, target_nearwall)
+        if self.lerp_nearwall_2 > 0.001 then
+            extra_offsetpos:Add(nwpos * self.lerp_nearwall_2)
+            extra_offsetang:Add(nwang * self.lerp_nearwall_2)
+        end
+    end
+
+    if nearwalldelta < 1 and !(((self:GetNW2Bool("EFT_LowReadyStance", true) or self:GetNW2Bool("EFT_HighReadyStance", true)) and self:GetSightAmount() == 0) or self:GetSafe()) then
         nearwalldelta = math_ease.InOutQuad(nearwalldelta) - curvedcustomizedelta
         -- sprintdelta = math.max(sprintdelta, ts_sprintdelta)
         local sprpos = swepGetProcessedValue(self, "NearWallPos", true) or swepGetProcessedValue(self, "SprintPos", true) or swepGetProcessedValue(self, "RestPos", true)
@@ -576,6 +593,7 @@ function SWEP:GetViewModelPosition(pos, ang)
         LerpAngleEdit(nearwalldelta, offsetang, sprang)
         LerpAngleEdit(nearwalldelta, extra_offsetang, angle_zero)
     end
+
 
     if curvedcustomizedelta > 0 then
         local cpos = Vector(swepGetProcessedValue(self, "CustomizePos", true))
@@ -696,6 +714,7 @@ function SWEP:GetViewModelPosition(pos, ang)
         end
     end
 
+    
     pos, ang = self:GunControllerRHIK(pos, ang)
     pos, ang = self:GunControllerThirdArm(pos, ang)
     self.LastViewModelPos = pos

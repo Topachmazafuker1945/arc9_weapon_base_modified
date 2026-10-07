@@ -23,8 +23,8 @@ function SWEP:SprintLock()
     if self:GetSprintAmount() > 0 then return true end
     -- if self:GetTraversalSprintAmount() > 0 then retur    n true end
     -- if self:GetIsSprinting() then return true end
-    if self:GetIsNearWall() then return true end
-
+    -- if self:GetIsNearWall() then return true end
+    if self:GetNearWallAmount() > 0.99 then return true end
     return false
 end
 
@@ -482,13 +482,15 @@ function SWEP:DoPrimaryAttack()
 
 
     --if self:HoldingBreath() and !infbreathconvar:GetBool() then
-    if self:HoldingBreath() then
-        local d = 100 / math.max(1, swepGetProcessedValue(self, "HoldBreathTime", true))
-        local breathtake = math.Clamp(delay * d * 3, 1, 10)
-        if manualaction then
-            breathtake = d
+    if (self.EFTWeapon and self:HoldingBreath() and GetConVar("arc9_eft_enable_breathing"):GetBool()) or (self:HoldingBreath() and !self.EFTWeapon) then
+        if self:HoldingBreath() then
+            local d = 100 / math.max(1, swepGetProcessedValue(self, "HoldBreathTime", true))
+            local breathtake = math.Clamp(delay * d * 3, 1, 10)
+            if manualaction then
+                breathtake = d
+            end
+            self:SetBreath(math.max(0, self:GetBreath() - breathtake))
         end
-        self:SetBreath(math.max(0, self:GetBreath() - breathtake))
     end
 
     -- ewww
@@ -1069,6 +1071,7 @@ function SWEP:GetShootPos()
     local shootposoffset_leftshoulder = swepGetProcessedValue(self, "ShootPosOffsetLeftShoulder", true)
     local shootposoffset_corner = swepGetProcessedValue(self, "ShootPosOffsetCorner", true)
     local shootposoffset_somalian = swepGetProcessedValue(self, "ShootPosOffsetSomalian", true)
+    local shootposoffset_nearwall = swepGetProcessedValue(self, "ShootPosOffsetNearWall", true)
     --local leftshouldervector = Vector(-4.0, 0, -4)
     --local sightoffset = Vector(-4, 0, 0)
     --local corneroffset = Vector(2, 0, 1)
@@ -1094,6 +1097,7 @@ function SWEP:GetShootPos()
         local eft_insomalian = self:GetNW2Bool("EFT_InSomalianStance", false) or {}
         local sight = self:GetSightDelta()
         local bipodamount = self:GetBipodAmount()
+        local nearwallamount = self:GetNearWallAmount()
 
         if sight > 0 or bipodamount == 1 then
             angRight:Mul(shootposoffset_aim[1])
@@ -1107,6 +1111,17 @@ function SWEP:GetShootPos()
             return pos, ang
         end
 
+        if nearwallamount > 0 then
+            angRight:Mul(shootposoffset_nearwall[1])
+            angForward:Mul(shootposoffset_nearwall[2])
+            angUp:Mul(shootposoffset_nearwall[3])
+
+            pos:Add(angRight)
+            pos:Add(angForward)
+            pos:Add(angUp)
+
+            return pos, ang
+        end
         if eft_inleftshoulder == true then
             angRight:Mul(shootposoffset_leftshoulder[1])
             angForward:Mul(shootposoffset_leftshoulder[2])
